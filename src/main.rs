@@ -1,9 +1,11 @@
 use indicatif::ProgressBar;
 use print_prep::cli::Cli;
 use print_prep::util::{ImageUtil, PathUtil};
+use print_prep::ErrorAbort;
 use rayon::prelude::*;
 use std::error::Error;
 use std::path::PathBuf;
+use std::process::exit;
 use std::time::Instant;
 use std::{env, fs};
 use structopt::StructOpt;
@@ -21,7 +23,7 @@ fn main() {
         rayon::ThreadPoolBuilder::new()
             .num_threads(threads)
             .build_global()
-            .expect("Error building thread pool. Pool already built.");
+            .exit("Error building thread pool. Pool already built.");
     }
 
     let files: Vec<_> = cli
@@ -36,24 +38,41 @@ fn main() {
 
         let name = file
             .file_stem()
-            .expect(&format!("Unexpected path format in {:?}", file))
+            .exit(&format!("Unexpected path format in {:?}", file))
             .to_str()
             .unwrap()
             .to_string();
         let out_path = PathBuf::from(cli.output.replace("*", &name));
 
         let op = cli.op.get_op();
-        let input = image::open(file).expect(&format!("Unable to read image {:?}", file));
-        let output = op
-            .execute(&input)
-            .expect(&format!("Unable to process image {:?}", file));
+        let input = image::open(file).exit(&format!("Unable to read image {:?}", file));
+        let output = match op.execute(&input) {
+            Ok(o) => o,
+            Err(e) => {
+                exit_on_error(&format!(
+                    "Unable to process image {:?}: {:?}",
+                    file,
+                    e.to_string()
+                ));
+                unreachable!()
+            }
+        };
 
-        ImageUtil::save_image(output, &out_path, cli.quality.unwrap_or(95))
-            .expect(&format!("Unable to save image to {:?}", out_path));
+        match ImageUtil::save_image(output, &out_path, cli.quality.unwrap_or(95)) {
+            Ok(_) => {}
+            Err(e) => {
+                exit_on_error(&format!(
+                    "Unable to save image to {:?}: {:?}",
+                    out_path,
+                    e.to_string()
+                ));
+                unreachable!()
+            }
+        };
     });
     bar.finish_and_clear();
 
-    println!("Total time: {:?}", start.elapsed());
+    println!("Success! Total time: {:?}", start.elapsed());
 
     if cli.wait {
         dont_disappear::any_key_to_continue::default();
@@ -77,4 +96,10 @@ fn parse_args() -> Result<Cli, Box<dyn Error>> {
         Cli::from_args()
     };
     Ok(args)
+}
+
+fn exit_on_error(message: &str) {
+    eprintln!("Terminated with ERROR:");
+    eprintln!("{}", message);
+    exit(1);
 }

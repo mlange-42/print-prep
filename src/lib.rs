@@ -3,8 +3,45 @@ pub mod op;
 pub mod units;
 pub mod util;
 
+#[macro_use]
+extern crate lazy_static;
+
 use std::error::Error;
 use std::fmt;
+use std::process::exit;
+
+pub trait ErrorAbort<T> {
+    fn exit(self, message: &str) -> T;
+}
+
+impl<T> ErrorAbort<T> for Option<T> {
+    fn exit(self, message: &str) -> T {
+        match self {
+            Some(v) => v,
+            None => {
+                eprintln!("Terminated with ERROR:");
+                eprintln!("{}", message);
+                exit(1);
+            }
+        }
+    }
+}
+
+impl<T, E> ErrorAbort<T> for Result<T, E>
+where
+    E: Error,
+{
+    fn exit(self, message: &str) -> T {
+        match self {
+            Ok(v) => v,
+            Err(e) => {
+                eprintln!("Terminated with ERROR:");
+                eprintln!("{} ({:?})", message, e);
+                exit(1);
+            }
+        }
+    }
+}
 
 /// Error type for failed parsing of `String`s to `enum`s.
 #[derive(Debug, Clone, PartialEq, Eq)]

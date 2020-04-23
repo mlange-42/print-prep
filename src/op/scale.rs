@@ -1,5 +1,6 @@
 use crate::cli::parse;
 use crate::op::ImageOperation;
+use crate::units::color::RGBA;
 use crate::units::length::{Length, LengthUnit, Scale, ScaleMode, Size};
 use crate::OperationParametersError;
 use image::imageops::FilterType;
@@ -10,21 +11,33 @@ use structopt::StructOpt;
 /// Scale images.
 #[derive(StructOpt, Debug)]
 pub struct ScaleImage {
-    /// Output image size. Use either `--size` or `--scale`.
+    /// Output image size.
+    /// Examples: `100px/.`, `./15cm`, `8in/6in`.
+    /// Use either `--size` or `--scale`.
     #[structopt(long)]
     size: Option<Size>,
-    /// Output image scale. Use either `--size` or `--scale`.
+    /// Output image scale.
+    /// Examples: `0.5`, `50%`, `20%/10%`.
+    /// Use either `--size` or `--scale`.
     #[structopt(long)]
     scale: Option<Scale>,
-    /// Scaling mode. Must be given when using `--size` with width and height.
+    /// Scaling mode.
+    /// One of `(keep|stretch|crop|fill)`.
+    /// Default: `keep`.
+    /// Must be given when using `--size` with width and height.
     #[structopt(long)]
     mode: Option<ScaleMode>,
-    /// Filter type for image scaling
+    /// Filter type for image scaling.
+    /// One of `(nearest|linear|cubic|gauss|lanczos)`.
+    /// Default: `cubic`.
     #[structopt(long, parse(try_from_str = parse::parse_filter_type))]
     filter: Option<FilterType>,
     /// Image resolution for size not in px. Default `300`.
     #[structopt(long)]
     dpi: Option<f32>,
+    /// Background color for `--mode fill`. Default `white`.
+    #[structopt(long)]
+    bg: Option<RGBA>,
 }
 impl ScaleImage {
     fn check(&self) -> Result<(), Box<dyn Error>> {
@@ -56,6 +69,7 @@ impl ImageOperation for ScaleImage {
         };
         let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
         let mode = self.mode.as_ref().unwrap_or(&ScaleMode::Keep);
+        let color = self.bg.clone().unwrap_or(RGBA::new(255, 255, 255, 255));
 
         let mut any_missing = false;
         let width = if let Some(w) = size.width() {
@@ -87,7 +101,7 @@ impl ImageOperation for ScaleImage {
                     } else {
                         DynamicImage::new_rgb8(width, height)
                     };
-                    let col = Rgba([255u8, 255u8, 255u8, 255u8]);
+                    let col = Rgba(*color.channels());
                     for y in 0..result.height() {
                         for x in 0..result.width() {
                             result.put_pixel(x, y, col);

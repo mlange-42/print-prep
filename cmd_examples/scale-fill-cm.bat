@@ -2,8 +2,8 @@
   --input ../test_data/*.png ^
   --output ../test_data/out/*-scale.png ^
   --debug ^
-  --wait ^
   scale ^
-    --size 200/500 ^
-	--mode keep
+    --size 2cm/5cm ^
+	--mode fill ^
+	--bg blue
 pause
