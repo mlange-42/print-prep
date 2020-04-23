@@ -35,7 +35,7 @@ fn main() {
         bar.inc(1);
 
         let name = file
-            .file_name()
+            .file_stem()
             .expect(&format!("Unexpected path format in {:?}", file))
             .to_str()
             .unwrap()

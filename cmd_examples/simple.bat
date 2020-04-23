@@ -1,8 +1,9 @@
 ..\target\release\pprep ^
-  --input C:\Data\Private\Photos\2020-04-04_Tauben\images_001\*.* ^
-  --output out\*-out.jpg ^
+  --input ../test_data/*.png ^
+  --output ../test_data/out/*-scale.png ^
   --debug ^
   --wait ^
   scale ^
-    --width 100 ^
-	--height 100 ^
+    --size 200/500 ^
+	--mode keep
+pause

@@ -32,7 +32,7 @@ impl FromStr for Scale {
         let mut width = if parts[0] == "." {
             None
         } else {
-            if parts[0].ends_with("%") {
+            if parts[0].ends_with('%') {
                 Some(parts[0][..(parts[0].len() - 1)].parse::<f32>()? * 0.01)
             } else {
                 Some(parts[0].parse()?)
@@ -41,7 +41,7 @@ impl FromStr for Scale {
         let mut height = if parts.len() < 2 || parts[1] == "." {
             None
         } else {
-            if parts[1].ends_with("%") {
+            if parts[1].ends_with('%') {
                 Some(parts[1][..(parts[1].len() - 1)].parse::<f32>()? * 0.01)
             } else {
                 Some(parts[1].parse()?)

@@ -3,7 +3,7 @@ use crate::op::ImageOperation;
 use crate::units::length::{Length, LengthUnit, Scale, ScaleMode, Size};
 use crate::OperationParametersError;
 use image::imageops::FilterType;
-use image::{DynamicImage, GenericImage, GenericImageView};
+use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 use std::error::Error;
 use structopt::StructOpt;
 
@@ -87,6 +87,12 @@ impl ImageOperation for ScaleImage {
                     } else {
                         DynamicImage::new_rgb8(width, height)
                     };
+                    let col = Rgba([255u8, 255u8, 255u8, 255u8]);
+                    for y in 0..result.height() {
+                        for x in 0..result.width() {
+                            result.put_pixel(x, y, col);
+                        }
+                    }
                     let x = (result.width() - temp.width()) / 2;
                     let y = (result.height() - temp.height()) / 2;
                     result.copy_from(&temp, x, y)?;
