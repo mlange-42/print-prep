@@ -42,7 +42,7 @@ fn main() {
             .to_string();
         let out_path = PathBuf::from(cli.output.replace("*", &name));
 
-        let mut op = cli.op.create_op();
+        let op = cli.op.get_op();
         let input = image::open(file).expect(&format!("Unable to read image {:?}", file));
         let output = op
             .execute(&input)

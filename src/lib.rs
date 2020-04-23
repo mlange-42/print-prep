@@ -37,3 +37,19 @@ impl fmt::Display for ParseStructError {
         self.0.fmt(f)
     }
 }
+
+/// Error type for failed parsing of `String`s to `struct`s.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct OperationParametersError(String);
+
+impl Error for OperationParametersError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        // Generic error, underlying cause isn't tracked.
+        None
+    }
+}
+impl fmt::Display for OperationParametersError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}

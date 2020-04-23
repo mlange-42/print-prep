@@ -5,17 +5,132 @@ use std::error::Error;
 use std::str::FromStr;
 
 #[derive(Debug, PartialEq)]
+pub struct Scale {
+    width: f32,
+    height: f32,
+}
+impl Scale {
+    pub fn width(&self) -> f32 {
+        self.width
+    }
+    pub fn height(&self) -> f32 {
+        self.height
+    }
+}
+
+impl FromStr for Scale {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<&str> = s.split("/").collect();
+        if parts.len() < 1 || parts.len() > 2 {
+            return Err(Box::new(ParseStructError(format!(
+                "Unexpected scale format in {}, expects `width/height` or `scale`",
+                s
+            ))));
+        }
+        let mut width = if parts[0] == "." {
+            None
+        } else {
+            if parts[0].ends_with("%") {
+                Some(parts[0][..(parts[0].len() - 1)].parse::<f32>()? * 0.01)
+            } else {
+                Some(parts[0].parse()?)
+            }
+        };
+        let mut height = if parts.len() < 2 || parts[1] == "." {
+            None
+        } else {
+            if parts[1].ends_with("%") {
+                Some(parts[1][..(parts[1].len() - 1)].parse::<f32>()? * 0.01)
+            } else {
+                Some(parts[1].parse()?)
+            }
+        };
+        if width.is_none() && height.is_none() {
+            return Err(Box::new(ParseStructError(format!(
+                "Unable to parse scale from {}, at least one of width or height must be given",
+                s
+            ))));
+        }
+        if width.is_none() {
+            width = Some(height.unwrap())
+        }
+        if height.is_none() {
+            height = Some(width.unwrap())
+        }
+        Ok(Scale {
+            width: width.unwrap(),
+            height: height.unwrap(),
+        })
+    }
+}
+
+#[derive(Debug, PartialEq)]
+pub enum ScaleMode {
+    Fill,
+    Crop,
+    Keep,
+    Stretch,
+}
+
+impl FromStr for ScaleMode {
+    type Err = ParseEnumError;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        match s {
+            "fill" => Ok(ScaleMode::Fill),
+            "crop" => Ok(ScaleMode::Crop),
+            "keep" => Ok(ScaleMode::Keep),
+            "stretch" => Ok(ScaleMode::Stretch),
+            _ => Err(ParseEnumError(format!(
+                "`{}` is not a valid scale mode. Must be one of `(keep|fill|crop|stretch)`",
+                s
+            ))),
+        }
+    }
+}
+
+#[derive(Debug, PartialEq)]
 pub struct Size {
     width: Option<Length>,
     height: Option<Length>,
 }
 
 impl Size {
+    pub fn new(width: Option<Length>, height: Option<Length>) -> Result<Self, ParseStructError> {
+        if width.is_none() && height.is_none() {
+            return Err(ParseStructError(
+                "Unable to create size, at least one of width or height must be given".to_string(),
+            ));
+        }
+        Ok(Size { width, height })
+    }
+    pub fn width(&self) -> &Option<Length> {
+        &self.width
+    }
+    pub fn height(&self) -> &Option<Length> {
+        &self.height
+    }
     pub fn to(&self, unit: &LengthUnit, dpi: f32) -> Size {
         Size {
             width: self.width.as_ref().and_then(|w| Some(w.to(unit, dpi))),
             height: self.height.as_ref().and_then(|w| Some(w.to(unit, dpi))),
         }
+    }
+    pub fn needs_dpi(&self) -> bool {
+        let mut needs = false;
+        if let Some(w) = &self.width {
+            if w.needs_dpi() {
+                needs = true;
+            }
+        };
+        if let Some(h) = &self.height {
+            if h.needs_dpi() {
+                needs = true;
+            }
+        };
+        needs
     }
 }
 
@@ -57,6 +172,12 @@ pub struct Length {
 }
 
 impl Length {
+    pub fn value(&self) -> f32 {
+        self.value
+    }
+    pub fn unit(&self) -> &LengthUnit {
+        &self.unit
+    }
     pub fn cm(value: f32) -> Self {
         Length {
             value,
@@ -93,6 +214,9 @@ impl Length {
                 LengthUnit::Px => Length::px(self.value.round() as i32),
             },
         }
+    }
+    pub fn needs_dpi(&self) -> bool {
+        self.unit.needs_dpi()
     }
 }
 
@@ -151,6 +275,14 @@ pub enum LengthUnit {
     Cm,
     Inch,
 }
+impl LengthUnit {
+    pub fn needs_dpi(&self) -> bool {
+        match self {
+            LengthUnit::Px => false,
+            _ => true,
+        }
+    }
+}
 impl FromStr for LengthUnit {
     type Err = ParseEnumError;
 
@@ -169,7 +301,7 @@ impl FromStr for LengthUnit {
 
 #[cfg(test)]
 mod test {
-    use crate::units::length::{Length, LengthUnit, Size, ToLength};
+    use crate::units::length::{Length, LengthUnit, Scale, Size, ToLength};
 
     #[test]
     fn parse_length() {
@@ -198,6 +330,15 @@ mod test {
         assert_eq!(size.height.as_ref().unwrap().value, 5.0);
         assert_eq!(size.width.as_ref().unwrap().unit, LengthUnit::Cm);
         assert_eq!(size.height.as_ref().unwrap().unit, LengthUnit::Cm);
+    }
+
+    #[test]
+    fn parse_scale() {
+        let str = "50%/100%";
+        let scale: Scale = str.parse().unwrap();
+
+        assert_eq!(scale.width, 0.5);
+        assert_eq!(scale.height, 1.0);
     }
 
     #[test]
