@@ -12,13 +12,12 @@ use structopt::StructOpt;
 ///
 /// Use `pprep -h`     for help, or
 ///     `pprep --help` for more detailed help, or
-///     `pprep <operation> -h` for help on an operation
+///     `pprep <subcommand> -h` for help on an operation
 ///
 /// For more documentation and explanation of the algorithm, see the GitHub repository:
 ///      https://mlange-42.github.io/print-prep/
 #[derive(StructOpt, Debug)]
 #[structopt(verbatim_doc_comment)]
-//#[structopt(name = "chrono-photo command line application")]
 pub struct Cli {
     /// List of input files or patterns
     #[structopt(short, long)]
