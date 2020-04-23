@@ -1,0 +1,121 @@
+//! Command-line interface for `print-prep`.
+
+pub mod parse;
+
+use crate::op;
+use crate::op::ImageOperation;
+use image::imageops::FilterType;
+use std::error::Error;
+use std::fmt;
+use std::str::FromStr;
+use structopt::StructOpt;
+
+/// Command-line tool for photo print preparation and other bulk image operations.
+///
+/// Use `pprep -h`     for help, or
+///     `pprep --help` for more detailed help, or
+///     `pprep <operation> -h` for help on an operation
+///
+/// For more documentation and explanation of the algorithm, see the GitHub repository:
+///      https://mlange-42.github.io/print-prep/
+#[derive(StructOpt, Debug)]
+#[structopt(verbatim_doc_comment)]
+//#[structopt(name = "chrono-photo command line application")]
+pub struct Cli {
+    /// List of input files or patterns
+    #[structopt(short, long)]
+    pub input: Vec<String>,
+
+    /// Output path. Use `*` as placeholder for the original file name.
+    #[structopt(short, long)]
+    pub output: String,
+
+    /// Image quality for JPEG output in percent. Optional, default `95`.
+    #[structopt(short, long)]
+    pub quality: Option<u8>,
+
+    /// Number of threads for parallel processing. Optional, default: number of processors.
+    #[structopt(short, long)]
+    pub threads: Option<usize>,
+
+    /// Debug print parsed command line options
+    #[structopt(short, long)]
+    pub debug: bool,
+
+    /// Wait for user input after processing
+    #[structopt(short, long)]
+    pub wait: bool,
+
+    /// Input selection
+    #[structopt(subcommand)]
+    pub op: Operation,
+}
+
+/// Operations
+#[allow(dead_code)]
+#[derive(StructOpt, Debug)]
+pub enum Operation {
+    /// Scale images.
+    Scale {
+        /// Output image width
+        #[structopt(long)]
+        width: u32,
+        /// Output image height
+        #[structopt(long)]
+        height: u32,
+        /// Filter type for image scaling
+        #[structopt(long, parse(try_from_str = parse::parse_filter_type))]
+        filter: Option<FilterType>,
+    },
+}
+
+impl Operation {
+    pub fn create_op(&self) -> Box<dyn ImageOperation> {
+        Box::new(match self {
+            Operation::Scale {
+                width,
+                height,
+                filter,
+            } => op::ScaleImage::new(*width, *height, filter.unwrap_or(FilterType::Triangle)),
+        })
+    }
+}
+
+impl FromStr for Cli {
+    type Err = ParseCliError;
+
+    /// Parses a string into a Cli.
+    fn from_str(str: &str) -> Result<Self, Self::Err> {
+        let quote_parts: Vec<_> = str.split('"').collect();
+        let mut args: Vec<String> = vec![];
+        for (i, part) in quote_parts.iter().enumerate() {
+            let part = part.trim();
+            if i % 2 == 0 {
+                args.extend(
+                    part.split(' ')
+                        .map(|s| s.trim().to_string())
+                        .filter(|s| !s.is_empty()),
+                );
+            } else {
+                args.push(part.to_string());
+            }
+        }
+        Ok(Cli::from_iter(args.iter()))
+    }
+}
+
+/// Error type for failed parsing command line argument.
+#[derive(Debug, Clone, PartialEq, Eq)]
+pub struct ParseCliError(String);
+
+impl Error for ParseCliError {
+    fn source(&self) -> Option<&(dyn Error + 'static)> {
+        None
+    }
+}
+
+impl fmt::Display for ParseCliError {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        self.0.fmt(f)
+    }
+}
