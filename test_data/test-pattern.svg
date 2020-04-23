@@ -1,0 +1,725 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<svg
+   xmlns:dc="http://purl.org/dc/elements/1.1/"
+   xmlns:cc="http://creativecommons.org/ns#"
+   xmlns:rdf="http://www.w3.org/1999/02/22-rdf-syntax-ns#"
+   xmlns:svg="http://www.w3.org/2000/svg"
+   xmlns="http://www.w3.org/2000/svg"
+   xmlns:xlink="http://www.w3.org/1999/xlink"
+   xmlns:sodipodi="http://sodipodi.sourceforge.net/DTD/sodipodi-0.dtd"
+   xmlns:inkscape="http://www.inkscape.org/namespaces/inkscape"
+   version="1.1"
+   width="32cm"
+   height="18cm"
+   viewBox="-5 -2.5 240 135"
+   id="svg216"
+   sodipodi:docname="test-pattern.svg"
+   inkscape:export-filename="C:\Data\Hack\Rust\DataProcessing\print-prep\test_data\test-pattern.png"
+   inkscape:export-xdpi="101.6"
+   inkscape:export-ydpi="101.6"
+   inkscape:version="0.92.4 (5da689c313, 2019-01-14)">
+  <metadata
+     id="metadata220">
+    <rdf:RDF>
+      <cc:Work
+         rdf:about="">
+        <dc:format>image/svg+xml</dc:format>
+        <dc:type
+           rdf:resource="http://purl.org/dc/dcmitype/StillImage" />
+      </cc:Work>
+    </rdf:RDF>
+  </metadata>
+  <sodipodi:namedview
+     pagecolor="#ffffff"
+     bordercolor="#666666"
+     borderopacity="1"
+     objecttolerance="10"
+     gridtolerance="10"
+     guidetolerance="10"
+     inkscape:pageopacity="0"
+     inkscape:pageshadow="2"
+     inkscape:window-width="1920"
+     inkscape:window-height="1013"
+     id="namedview218"
+     showgrid="false"
+     inkscape:zoom="0.42094951"
+     inkscape:cx="730.20619"
+     inkscape:cy="338.88737"
+     inkscape:window-x="-9"
+     inkscape:window-y="-9"
+     inkscape:window-maximized="1"
+     inkscape:current-layer="svg216" />
+  <title
+     id="title2">Widescreen test pattern</title>
+  <desc
+     id="desc4">Created 2009 March 28 by Lawrence D'Oliveiro &lt;ldo@geek-central.gen.nz&gt;,
+	released under the Creative Commons Attribution Share Alike (CC-BY-SA) licence</desc>
+  <defs
+     id="defs90">
+    <pattern
+       id="bggrid"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="0"
+       width="10"
+       height="10">
+      <rect
+         x="0.5"
+         y="0.5"
+         width="9"
+         height="9"
+         fill="#808080"
+         id="rect6" />
+    </pattern>
+    <pattern
+       id="horbordergrid"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="0"
+       width="20"
+       height="20">
+      <rect
+         x="0.5"
+         y="10.5"
+         width="9"
+         height="9"
+         fill="#000000"
+         id="rect9" />
+    </pattern>
+    <pattern
+       id="vertbordergrid"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="0"
+       width="20"
+       height="20">
+      <rect
+         x="10.5"
+         y="0.5"
+         width="9"
+         height="9"
+         fill="#000000"
+         id="rect12" />
+    </pattern>
+    <pattern
+       id="uppercheck"
+       patternUnits="userSpaceOnUse"
+       x="60"
+       y="30"
+       width="13.8"
+       height="10">
+      <rect
+         x="0"
+         y="0"
+         width="6.9"
+         height="10"
+         fill="#000000"
+         id="rect15" />
+      <rect
+         x="6.9"
+         y="0"
+         width="6.9"
+         height="10"
+         fill="#bebebe"
+         id="rect17" />
+    </pattern>
+    <pattern
+       id="centergrid"
+       patternUnits="userSpaceOnUse"
+       x="50"
+       y="50"
+       width="10"
+       height="15">
+      <rect
+         x="0"
+         y="0"
+         width="10"
+         height="15"
+         fill="#ffffff"
+         id="rect20" />
+      <rect
+         x="0.5"
+         y="0.5"
+         width="9"
+         height="14"
+         fill="#000000"
+         id="rect22" />
+    </pattern>
+    <pattern
+       id="grating5"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="70"
+       width="4.4"
+       height="20">
+      <rect
+         x="0"
+         y="0"
+         width="2.2"
+         height="20"
+         fill="#000000"
+         id="rect25" />
+      <rect
+         x="2.2"
+         y="0"
+         width="2.2"
+         height="20"
+         fill="#ffffff"
+         id="rect27" />
+    </pattern>
+    <pattern
+       id="grating10"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="70"
+       width="2.2"
+       height="20">
+      <rect
+         x="0"
+         y="0"
+         width="1.1"
+         height="20"
+         fill="#000000"
+         id="rect30" />
+      <rect
+         x="1.1"
+         y="0"
+         width="1.1"
+         height="20"
+         fill="#ffffff"
+         id="rect32" />
+    </pattern>
+    <pattern
+       id="grating15"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="70"
+       width="1.467"
+       height="20">
+      <rect
+         x="0"
+         y="0"
+         width="0.74"
+         height="20"
+         fill="#000000"
+         id="rect35" />
+      <rect
+         x="0.73"
+         y="0"
+         width="0.73"
+         height="20"
+         fill="#ffffff"
+         id="rect37" />
+    </pattern>
+    <pattern
+       id="grating20"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="70"
+       width="1.1"
+       height="20">
+      <rect
+         x="0"
+         y="0"
+         width="0.55"
+         height="20"
+         fill="#000000"
+         id="rect40" />
+      <rect
+         x="0.55"
+         y="0"
+         width="0.55"
+         height="20"
+         fill="#ffffff"
+         id="rect42" />
+    </pattern>
+    <pattern
+       id="grating25"
+       patternUnits="userSpaceOnUse"
+       x="0"
+       y="70"
+       width="0.88"
+       height="20">
+      <rect
+         x="0"
+         y="0"
+         width="0.44"
+         height="20"
+         fill="#000000"
+         id="rect45" />
+      <rect
+         x="0.44"
+         y="0"
+         width="0.44"
+         height="20"
+         fill="#ffffff"
+         id="rect47" />
+    </pattern>
+    <clipPath
+       id="centercircle"
+       clipPathUnits="userSpaceOnUse">
+      <circle
+         cx="115"
+         cy="65"
+         r="60"
+         id="circle50" />
+    </clipPath>
+    <desc
+       id="desc53">construction of corner radials</desc>
+    <path
+       id="ray"
+       d="M0 0 L0.26 10 L-0.26 10 Z"
+       fill="white" />
+    <g
+       id="rayquadrant">
+      <desc
+         id="desc56">one quadrant of rays</desc>
+      <use
+         xlink:href="#ray"
+         transform="rotate(-15)"
+         id="use58" />
+      <use
+         xlink:href="#ray"
+         transform="rotate(-9)"
+         id="use60" />
+      <use
+         xlink:href="#ray"
+         transform="rotate(-3)"
+         id="use62" />
+      <use
+         xlink:href="#ray"
+         transform="rotate(3)"
+         id="use64" />
+      <use
+         xlink:href="#ray"
+         transform="rotate(9)"
+         id="use66" />
+      <use
+         xlink:href="#ray"
+         transform="rotate(15)"
+         id="use68" />
+    </g>
+    <g
+       id="radial">
+      <desc
+         id="desc71">put the lot together</desc>
+      <circle
+         cx="0"
+         cy="0"
+         r="15"
+         fill="#000000"
+         stroke="#ffffff"
+         stroke-width="1"
+         id="circle73" />
+      <use
+         xlink:href="#rayquadrant"
+         transform="scale(1.5)"
+         id="use75" />
+      <use
+         xlink:href="#rayquadrant"
+         transform="scale(1.5) rotate(90)"
+         id="use77" />
+      <use
+         xlink:href="#rayquadrant"
+         transform="scale(1.5) rotate(180)"
+         id="use79" />
+      <use
+         xlink:href="#rayquadrant"
+         transform="scale(1.5) rotate(-90)"
+         id="use81" />
+      <circle
+         cx="0"
+         cy="0"
+         r="3.5"
+         fill="#000000"
+         stroke="#ffffff"
+         stroke-width="0.5"
+         id="circle83" />
+      <circle
+         cx="0"
+         cy="0"
+         r="2.5"
+         fill="#000000"
+         stroke="#ffffff"
+         stroke-width="0.5"
+         id="circle85" />
+      <circle
+         cx="0"
+         cy="0"
+         r="1.5"
+         fill="#000000"
+         stroke="#ffffff"
+         stroke-width="0.5"
+         id="circle87" />
+    </g>
+  </defs>
+  <desc
+     id="desc92">background</desc>
+  <rect
+     x="-5"
+     y="-2.5"
+     width="240"
+     height="135"
+     fill="#ffffff"
+     id="rect94" />
+  <rect
+     x="0"
+     y="0"
+     width="230"
+     height="130"
+     fill="url(#bggrid)"
+     id="rect96" />
+  <desc
+     id="desc98">overscan</desc>
+  <rect
+     x="-5"
+     y="-2.5"
+     width="5"
+     height="135"
+     fill="url(#vertbordergrid)"
+     id="rect100" />
+  <rect
+     x="230"
+     y="-2.5"
+     width="5"
+     height="135"
+     fill="url(#vertbordergrid)"
+     id="rect102" />
+  <rect
+     x="0"
+     y="-2.5"
+     width="240"
+     height="5"
+     fill="url(#horbordergrid)"
+     id="rect104" />
+  <rect
+     x="0"
+     y="130"
+     width="240"
+     height="5"
+     fill="url(#horbordergrid)"
+     id="rect106" />
+  <desc
+     id="desc108">central circular pattern</desc>
+  <g
+     clip-path="url(#centercircle)"
+     id="g186">
+    <!-- <rect x="55" y="5" width="120" height="120" fill="black"/> -->
+    <desc
+       id="desc110">place for upper caption</desc>
+    <rect
+       x="75"
+       y="5"
+       width="80"
+       height="15"
+       fill="#ffffff"
+       id="rect112" />
+    <rect
+       x="95"
+       y="11"
+       width="40"
+       height="9"
+       fill="#000000"
+       id="rect114" />
+    <text
+       x="115"
+       y="18"
+       text-anchor="middle"
+       font-family="Arial"
+       font-weight="bold"
+       font-size="8"
+       fill="#ffffff"
+       id="text116">LDO TV</text>
+    <rect
+       x="65"
+       y="20"
+       width="20"
+       height="10"
+       fill="#000000"
+       id="rect118" />
+    <rect
+       x="85"
+       y="20"
+       width="60"
+       height="10"
+       fill="#ffffff"
+       id="rect120" />
+    <rect
+       x="89.25"
+       y="20"
+       width="1"
+       height="10"
+       fill="#000000"
+       id="rect122" />
+    <rect
+       x="145"
+       y="20"
+       width="20"
+       height="10"
+       fill="#000000"
+       id="rect124" />
+    <rect
+       x="60"
+       y="30"
+       width="110"
+       height="10"
+       fill="url(#uppercheck)"
+       id="rect126" />
+    <desc
+       id="desc128">big coloured squares</desc>
+    <rect
+       x="55"
+       y="40"
+       width="20"
+       height="20"
+       fill="#ffff00"
+       id="rect130" />
+    <rect
+       x="75"
+       y="40"
+       width="20"
+       height="20"
+       fill="#00ffff"
+       id="rect132" />
+    <rect
+       x="95"
+       y="40"
+       width="20"
+       height="20"
+       fill="#00ff00"
+       id="rect134" />
+    <rect
+       x="115"
+       y="40"
+       width="20"
+       height="20"
+       fill="#ff00ff"
+       id="rect136" />
+    <rect
+       x="135"
+       y="40"
+       width="20"
+       height="20"
+       fill="#ff0000"
+       id="rect138" />
+    <rect
+       x="155"
+       y="40"
+       width="20"
+       height="20"
+       fill="#0000ff"
+       id="rect140" />
+    <desc
+       id="desc142">graduated gratings</desc>
+    <rect
+       x="55"
+       y="70"
+       width="5"
+       height="20"
+       fill="#000000"
+       id="rect144" />
+    <rect
+       x="170"
+       y="70"
+       width="5"
+       height="20"
+       fill="#000000"
+       id="rect146" />
+    <rect
+       x="60"
+       y="70"
+       width="22"
+       height="20"
+       fill="url(#grating5)"
+       id="rect148" />
+    <rect
+       x="82"
+       y="70"
+       width="22"
+       height="20"
+       fill="url(#grating10)"
+       id="rect150" />
+    <rect
+       x="104"
+       y="70"
+       width="22"
+       height="20"
+       fill="url(#grating15)"
+       id="rect152" />
+    <rect
+       x="126"
+       y="70"
+       width="22"
+       height="20"
+       fill="url(#grating20)"
+       id="rect154" />
+    <rect
+       x="148"
+       y="70"
+       width="22"
+       height="20"
+       fill="url(#grating25)"
+       id="rect156" />
+    <desc
+       id="desc158">centre cross-shaped grid with vertical middle line</desc>
+    <path
+       d="M50 60 L110 60 110.5 50.5 119.5 50.5 119.5 60 180 60 180 70 119.5 70 119.5 79.5 110.5 79.5 110.5 70 50 70Z"
+       fill="url(#centergrid)"
+       id="path160" />
+    <rect
+       x="114.5"
+       y="50.5"
+       width="1"
+       height="29"
+       fill="#ffffff"
+       id="rect162" />
+    <desc
+       id="desc164">graduated greyscale rectangles</desc>
+    <rect
+       x="60"
+       y="90"
+       width="18"
+       height="10"
+       fill="#000000"
+       id="rect166" />
+    <rect
+       x="78"
+       y="90"
+       width="19"
+       height="10"
+       fill="#333333"
+       id="rect168" />
+    <rect
+       x="97"
+       y="90"
+       width="18"
+       height="10"
+       fill="#666666"
+       id="rect170" />
+    <rect
+       x="115"
+       y="90"
+       width="19"
+       height="10"
+       fill="#999999"
+       id="rect172" />
+    <rect
+       x="134"
+       y="90"
+       width="18"
+       height="10"
+       fill="#cccccc"
+       id="rect174" />
+    <rect
+       x="152"
+       y="90"
+       width="18"
+       height="10"
+       fill="#ffffff"
+       id="rect176" />
+    <desc
+       id="desc178">place for lower caption</desc>
+    <rect
+       x="60"
+       y="100"
+       width="110"
+       height="10"
+       fill="white"
+       id="rect180" />
+    <!--
+			<rect x="85" y="100" width="60" height="10" fill="black"/>
+			<text x="115" y="108" text-anchor="middle" font-family="Arial"
+				font-weight="bold" font-size="8" fill="#ffffff">DIGITAL</text>
+		-->
+    <rect
+       x="70"
+       y="110"
+       width="90"
+       height="20"
+       fill="#ffff00"
+       id="rect182" />
+    <rect
+       x="110"
+       y="110"
+       width="10"
+       height="20"
+       fill="#ff0000"
+       id="rect184" />
+  </g>
+  <desc
+     id="desc188">surrounding pastel rectangles</desc>
+  <rect
+     x="50"
+     y="10.5"
+     width="9.5"
+     height="19.5"
+     fill="#4180be"
+     id="rect190" />
+  <rect
+     x="40.5"
+     y="10.5"
+     width="9.5"
+     height="54.5"
+     fill="#41be80"
+     id="rect192" />
+  <rect
+     x="40.5"
+     y="65"
+     width="9.5"
+     height="54.5"
+     fill="#be4180"
+     id="rect194" />
+  <rect
+     x="50"
+     y="100"
+     width="9.5"
+     height="19.5"
+     fill="#be8041"
+     id="rect196" />
+  <rect
+     x="170.5"
+     y="10.5"
+     width="9.5"
+     height="19.5"
+     fill="#4180be"
+     id="rect198" />
+  <rect
+     x="180"
+     y="10.5"
+     width="9.5"
+     height="54.5"
+     fill="#80be41"
+     id="rect200" />
+  <rect
+     x="180"
+     y="65"
+     width="9.5"
+     height="54.5"
+     fill="#8041be"
+     id="rect202" />
+  <rect
+     x="170.5"
+     y="100"
+     width="9.5"
+     height="19.5"
+     fill="#be8041"
+     id="rect204" />
+  <desc
+     id="desc206">corner radials</desc>
+  <use
+     xlink:href="#radial"
+     transform="translate(20, 20)"
+     id="use208" />
+  <use
+     xlink:href="#radial"
+     transform="translate(210, 20)"
+     id="use210" />
+  <use
+     xlink:href="#radial"
+     transform="translate(20, 110)"
+     id="use212" />
+  <use
+     xlink:href="#radial"
+     transform="translate(210, 110)"
+     id="use214" />
+</svg>

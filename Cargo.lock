@@ -517,6 +517,7 @@ dependencies = [
  "glob",
  "image",
  "indicatif",
+ "lazy_static",
  "path-absolutize",
  "rayon",
  "structopt",

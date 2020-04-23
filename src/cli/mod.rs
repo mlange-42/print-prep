@@ -2,9 +2,7 @@
 
 pub mod parse;
 
-use crate::op;
-use crate::op::ImageOperation;
-use image::imageops::FilterType;
+use crate::op::{ImageOperation, ScaleImage};
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
@@ -14,13 +12,12 @@ use structopt::StructOpt;
 ///
 /// Use `pprep -h`     for help, or
 ///     `pprep --help` for more detailed help, or
-///     `pprep <operation> -h` for help on an operation
+///     `pprep <subcommand> -h` for help on an operation
 ///
 /// For more documentation and explanation of the algorithm, see the GitHub repository:
 ///      https://mlange-42.github.io/print-prep/
 #[derive(StructOpt, Debug)]
 #[structopt(verbatim_doc_comment)]
-//#[structopt(name = "chrono-photo command line application")]
 pub struct Cli {
     /// List of input files or patterns
     #[structopt(short, long)]
@@ -55,29 +52,14 @@ pub struct Cli {
 #[allow(dead_code)]
 #[derive(StructOpt, Debug)]
 pub enum Operation {
-    /// Scale images.
-    Scale {
-        /// Output image width
-        #[structopt(long)]
-        width: u32,
-        /// Output image height
-        #[structopt(long)]
-        height: u32,
-        /// Filter type for image scaling
-        #[structopt(long, parse(try_from_str = parse::parse_filter_type))]
-        filter: Option<FilterType>,
-    },
+    Scale(ScaleImage),
 }
 
 impl Operation {
-    pub fn create_op(&self) -> Box<dyn ImageOperation> {
-        Box::new(match self {
-            Operation::Scale {
-                width,
-                height,
-                filter,
-            } => op::ScaleImage::new(*width, *height, filter.unwrap_or(FilterType::Triangle)),
-        })
+    pub fn get_op(&self) -> &dyn ImageOperation {
+        match self {
+            Operation::Scale(sc) => sc,
+        }
     }
 }
 
