@@ -10,6 +10,10 @@ use std::error::Error;
 use std::fmt;
 use std::process::exit;
 
+/// Trait to print a message and exit the program.
+/// Implemented for `Result` and `Option`.
+///
+/// Use like `expect(...)`.
 pub trait ErrorAbort<T> {
     fn exit(self, message: &str) -> T;
 }
@@ -75,7 +79,7 @@ impl fmt::Display for ParseStructError {
     }
 }
 
-/// Error type for failed parsing of `String`s to `struct`s.
+/// Error type for illegal image operation parameters.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OperationParametersError(String);
 

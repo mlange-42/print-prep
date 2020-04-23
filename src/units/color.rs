@@ -1,8 +1,10 @@
+//! Color data structures and conversions.
 use crate::ParseStructError;
 use std::collections::HashMap;
 use std::error::Error;
 use std::str::FromStr;
 
+/// RGBA color data structure.
 #[derive(Clone, Debug)]
 pub struct RGBA {
     channels: [u8; 4],
@@ -54,7 +56,8 @@ impl FromStr for RGBA {
 }
 
 lazy_static! {
-    static ref COLORS: HashMap<&'static str, RGBA> = {
+    /// Named color.
+    pub static ref COLORS: HashMap<&'static str, RGBA> = {
         let mut m = HashMap::new();
         m.insert("transparent", RGBA::new(255, 255, 255, 0));
         m.insert("air_force_blue_raf", RGBA::new(93, 138, 168, 255));

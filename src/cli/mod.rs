@@ -12,14 +12,14 @@ use structopt::StructOpt;
 ///
 /// Use `pprep -h`     for help, or
 ///     `pprep --help` for more detailed help, or
-///     `pprep <subcommand> -h` for help on an operation
+///     `pprep <subcommand> -h` for help on an operation.
 ///
-/// For more documentation and explanation of the algorithm, see the GitHub repository:
+/// For more documentation, see the GitHub repository:
 ///      https://mlange-42.github.io/print-prep/
 #[derive(StructOpt, Debug)]
 #[structopt(verbatim_doc_comment)]
 pub struct Cli {
-    /// List of input files or patterns
+    /// List of input files or patterns.
     #[structopt(short, long)]
     pub input: Vec<String>,
 
@@ -35,27 +35,29 @@ pub struct Cli {
     #[structopt(short, long)]
     pub threads: Option<usize>,
 
-    /// Debug print parsed command line options
+    /// Debug print parsed command line options.
     #[structopt(short, long)]
     pub debug: bool,
 
-    /// Wait for user input after processing
+    /// Wait for user input after processing.
     #[structopt(short, long)]
     pub wait: bool,
 
-    /// Input selection
+    /// Input selection.
     #[structopt(subcommand)]
     pub op: Operation,
 }
 
-/// Operations
+/// Image operations
 #[allow(dead_code)]
 #[derive(StructOpt, Debug)]
 pub enum Operation {
+    /// Scales images.
     Scale(ScaleImage),
 }
 
 impl Operation {
+    /// Returns the associated ImageOperation.
     pub fn get_op(&self) -> &dyn ImageOperation {
         match self {
             Operation::Scale(sc) => sc,

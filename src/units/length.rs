@@ -4,15 +4,33 @@ use crate::{ParseEnumError, ParseStructError};
 use std::error::Error;
 use std::str::FromStr;
 
+/// Relative scaling parameters.
+///
+/// Can be parsed from stings of format `width/height` or `scale`.
+/// `width` and `height´ can be fractions or percentages.
+/// Examples:
+/// ```ignore
+/// 50%
+/// 20%/50%
+/// 0.6/0.8
+/// ```
+///
+/// `.` can be used as placeholder.
+/// Examples:
+/// ```ignore
+/// ./20%
+/// ```
 #[derive(Debug, PartialEq)]
 pub struct Scale {
     width: f32,
     height: f32,
 }
 impl Scale {
+    /// Width of this scaling.
     pub fn width(&self) -> f32 {
         self.width
     }
+    /// Height of this scaling.
     pub fn height(&self) -> f32 {
         self.height
     }
@@ -66,11 +84,20 @@ impl FromStr for Scale {
     }
 }
 
+/// Scaling modes
 #[derive(Debug, PartialEq)]
 pub enum ScaleMode {
-    Fill,
-    Crop,
+    /// Keeps the original aspect ratio.
+    /// The resulting image may be smaller than given by scale/size in one dimension.
     Keep,
+    /// Keeps the original aspect ratio.
+    /// The resulting image has exactly the given size, but additional space is filled uniformly.
+    Fill,
+    /// Keeps the original aspect ratio.
+    /// The resulting image has exactly the given size, but surplus image space is cropped.
+    Crop,
+    /// Aspect ratio is changed.
+    /// The resulting image has exactly the given size, and the image is stretched.
     Stretch,
 }
 
@@ -91,6 +118,23 @@ impl FromStr for ScaleMode {
     }
 }
 
+/// Absolute scaling parameters.
+///
+/// Can be parsed from stings of format `width/height`.
+/// `width` and `height´ can be in units px, cm or inch.
+/// Examples:
+/// ```ignore
+/// 10cm/5cm
+/// 1024px/512px
+/// 5in/3in
+/// ```
+///
+/// `.` can be used as placeholder.
+/// Examples:
+/// ```ignore
+/// 15cm/.
+/// ./512px
+/// ```
 #[derive(Debug, PartialEq)]
 pub struct Size {
     width: Option<Length>,
@@ -106,18 +150,22 @@ impl Size {
         }
         Ok(Size { width, height })
     }
+    /// Width of this size.
     pub fn width(&self) -> &Option<Length> {
         &self.width
     }
+    /// Height of this size.
     pub fn height(&self) -> &Option<Length> {
         &self.height
     }
+    /// Converts this size to another unit.
     pub fn to(&self, unit: &LengthUnit, dpi: f32) -> Size {
         Size {
             width: self.width.as_ref().and_then(|w| Some(w.to(unit, dpi))),
             height: self.height.as_ref().and_then(|w| Some(w.to(unit, dpi))),
         }
     }
+    /// Does this size require a dpi value for conversion to px?
     pub fn needs_dpi(&self) -> bool {
         let mut needs = false;
         if let Some(w) = &self.width {
@@ -165,6 +213,7 @@ impl FromStr for Size {
     }
 }
 
+/// A length with unit.
 #[derive(Debug, PartialEq)]
 pub struct Length {
     value: f32,
@@ -172,30 +221,36 @@ pub struct Length {
 }
 
 impl Length {
+    /// The length value.
     pub fn value(&self) -> f32 {
         self.value
     }
+    /// The length unit.
     pub fn unit(&self) -> &LengthUnit {
         &self.unit
     }
+    /// Creates a new length in centimeters.
     pub fn cm(value: f32) -> Self {
         Length {
             value,
             unit: LengthUnit::Cm,
         }
     }
+    /// Creates a new length in inches.
     pub fn inch(value: f32) -> Self {
         Length {
             value,
             unit: LengthUnit::Inch,
         }
     }
+    /// Creates a new length in pixels.
     pub fn px(value: i32) -> Self {
         Length {
             value: value as f32,
             unit: LengthUnit::Px,
         }
     }
+    /// Converts this length to another unit.
     pub fn to(&self, unit: &LengthUnit, dpi: f32) -> Length {
         match self.unit {
             LengthUnit::Cm => match unit {
@@ -215,6 +270,7 @@ impl Length {
             },
         }
     }
+    /// Does this length require a dpi value for conversion to px?
     pub fn needs_dpi(&self) -> bool {
         self.unit.needs_dpi()
     }
@@ -238,9 +294,13 @@ impl FromStr for Length {
     }
 }
 
+/// Trait to convert numbers to lengths with unit.
 pub trait ToLength {
+    /// Converts the number to a length in centimeters.
     fn cm(&self) -> Length;
+    /// Converts the number to a length in inches.
     fn inch(&self) -> Length;
+    /// Converts the number to a length in pixels.
     fn px(&self) -> Length;
 }
 impl ToLength for f32 {
@@ -269,13 +329,18 @@ impl ToLength for i32 {
 const INCH_TO_CM: f32 = 2.54;
 const CM_TO_INCH: f32 = 1.0 / 2.54;
 
+/// Length units.
 #[derive(Debug, PartialEq)]
 pub enum LengthUnit {
+    /// Pixels.
     Px,
+    /// Centimeters.
     Cm,
+    /// Inches.
     Inch,
 }
 impl LengthUnit {
+    /// Does this unit require a dpi value vor conversion to px?
     pub fn needs_dpi(&self) -> bool {
         match self {
             LengthUnit::Px => false,
