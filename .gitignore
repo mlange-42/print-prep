@@ -1,2 +1,4 @@
 /target
+/release
 *.iml
+_build-release.bat
