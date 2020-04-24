@@ -1,40 +1,59 @@
+//! Scale images.
+
 use crate::cli::parse;
-use crate::op::ImageOperation;
+use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::RGBA;
 use crate::units::length::{Length, LengthUnit, Scale, ScaleMode, Size};
 use crate::OperationParametersError;
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 use std::error::Error;
+use std::path::PathBuf;
 use structopt::StructOpt;
 
 /// Scale images.
 #[derive(StructOpt, Debug)]
 pub struct ScaleImage {
-    /// Output image size.
+    /// Output path. Use `*` as placeholder for the original base file name.
+    /// Used to determine output image type.
+    ///
+    /// Examples:
+    /// --output "path/to/*-out.jpg"
+    ///
+    #[structopt(verbatim_doc_comment)]
+    #[structopt(short, long)]
+    pub output: String,
+
+    /// Image quality for JPEG output in percent. Optional, default `95`.
+    #[structopt(short, long)]
+    pub quality: Option<u8>,
+
+    /// Output image size. Use either `--size` or `--scale`.
     /// Examples: `100px/.`, `./15cm`, `8in/6in`.
-    /// Use either `--size` or `--scale`.
     #[structopt(long)]
     size: Option<Size>,
-    /// Output image scale.
+
+    /// Output image scale. Use either `--size` or `--scale`.
     /// Examples: `0.5`, `50%`, `20%/10%`.
-    /// Use either `--size` or `--scale`.
     #[structopt(long)]
     scale: Option<Scale>,
-    /// Scaling mode.
+
+    /// Scaling mode. Must be given when using `--size` with width and height.
     /// One of `(keep|stretch|crop|fill)`.
     /// Default: `keep`.
-    /// Must be given when using `--size` with width and height.
     #[structopt(long)]
     mode: Option<ScaleMode>,
+
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
     /// Default: `cubic`.
     #[structopt(long, parse(try_from_str = parse::parse_filter_type))]
     filter: Option<FilterType>,
+
     /// Image resolution for size not in px. Default `300`.
     #[structopt(long)]
     dpi: Option<f32>,
+
     /// Background color for `--mode fill`. Default `white`.
     #[structopt(long)]
     bg: Option<RGBA>,
@@ -51,7 +70,21 @@ impl ScaleImage {
 }
 
 impl ImageOperation for ScaleImage {
-    fn execute(&self, image: &DynamicImage) -> Result<DynamicImage, Box<dyn Error>> {
+    fn execute(&self, files: &[PathBuf]) -> Result<(), Box<dyn Error>> {
+        ImageIoOperation::execute(self, &files)
+    }
+}
+
+impl ImageIoOperation for ScaleImage {
+    fn output(&self) -> &str {
+        &self.output
+    }
+
+    fn quality(&self) -> &Option<u8> {
+        &self.quality
+    }
+
+    fn process_image(&self, image: &DynamicImage) -> Result<DynamicImage, Box<dyn Error>> {
         self.check()?;
 
         let dpi = self.dpi.unwrap_or(300.0);
@@ -114,7 +147,6 @@ impl ImageOperation for ScaleImage {
                 }
             }
         };
-
         Ok(result)
     }
 }

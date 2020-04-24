@@ -2,7 +2,7 @@
 
 pub mod parse;
 
-use crate::op::{ImageOperation, ScaleImage};
+use crate::op::{ImageOperation, ListFiles, ScaleImage};
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
@@ -19,17 +19,16 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(verbatim_doc_comment)]
 pub struct Cli {
-    /// List of input files or patterns.
+    /// List of input files or patterns. On Unix systems, patterns must be quoted!
+    ///
+    /// Examples:
+    /// --input "path/to/*.jpg"
+    /// --input "path/to/*.jpg" "other/path/to/*.jpg"
+    /// --input image-0001.jpg image-0002.jpg image-0003.jpg
+    ///
+    #[structopt(verbatim_doc_comment)]
     #[structopt(short, long)]
     pub input: Vec<String>,
-
-    /// Output path. Use `*` as placeholder for the original file name.
-    #[structopt(short, long)]
-    pub output: String,
-
-    /// Image quality for JPEG output in percent. Optional, default `95`.
-    #[structopt(short, long)]
-    pub quality: Option<u8>,
 
     /// Number of threads for parallel processing. Optional, default: number of processors.
     #[structopt(short, long)]
@@ -54,6 +53,8 @@ pub struct Cli {
 pub enum Operation {
     /// Scales images.
     Scale(ScaleImage),
+    /// List files found by input pattern.
+    List(ListFiles),
 }
 
 impl Operation {
@@ -61,6 +62,7 @@ impl Operation {
     pub fn get_op(&self) -> &dyn ImageOperation {
         match self {
             Operation::Scale(sc) => sc,
+            Operation::List(ls) => ls,
         }
     }
 }
