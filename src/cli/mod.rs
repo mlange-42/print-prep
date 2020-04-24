@@ -51,7 +51,7 @@ pub struct Cli {
 #[allow(dead_code)]
 #[derive(StructOpt, Debug)]
 pub enum Operation {
-    /// Scales images.
+    /// Scale images to absolute or relative size.
     Scale(ScaleImage),
     /// List files found by input pattern.
     List(ListFiles),

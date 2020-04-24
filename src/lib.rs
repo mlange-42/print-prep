@@ -1,3 +1,7 @@
+//! Command line tool and library for preparing photos for printing, and other bulk image operations.
+
+#![doc(issue_tracker_base_url = "https://github.com/mlange-42/print-prep/issues/")]
+
 pub mod cli;
 pub mod op;
 pub mod units;

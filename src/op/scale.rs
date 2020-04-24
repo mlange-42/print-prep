@@ -3,7 +3,7 @@
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::RGBA;
-use crate::units::length::{Length, LengthUnit, Scale, ScaleMode, Size};
+use crate::units::{Length, LengthUnit, Scale, ScaleMode, Size};
 use crate::OperationParametersError;
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
@@ -41,21 +41,21 @@ pub struct ScaleImage {
     /// Scaling mode. Must be given when using `--size` with width and height.
     /// One of `(keep|stretch|crop|fill)`.
     /// Default: `keep`.
-    #[structopt(long)]
+    #[structopt(short, long)]
     mode: Option<ScaleMode>,
 
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
     /// Default: `cubic`.
-    #[structopt(long, parse(try_from_str = parse::parse_filter_type))]
+    #[structopt(short, long, parse(try_from_str = parse::parse_filter_type))]
     filter: Option<FilterType>,
 
     /// Image resolution for size not in px. Default `300`.
-    #[structopt(long)]
+    #[structopt(short, long)]
     dpi: Option<f32>,
 
     /// Background color for `--mode fill`. Default `white`.
-    #[structopt(long)]
+    #[structopt(short, long)]
     bg: Option<RGBA>,
 }
 impl ScaleImage {
@@ -88,6 +88,10 @@ impl ImageIoOperation for ScaleImage {
         self.check()?;
 
         let dpi = self.dpi.unwrap_or(300.0);
+        let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
+        let mode = self.mode.as_ref().unwrap_or(&ScaleMode::Keep);
+        let color = self.bg.clone().unwrap_or(RGBA::new(255, 255, 255, 255));
+
         let size = if let Some(s) = &self.size {
             s.to(&LengthUnit::Px, dpi)
         } else {
@@ -100,9 +104,6 @@ impl ImageIoOperation for ScaleImage {
                 )),
             )?
         };
-        let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
-        let mode = self.mode.as_ref().unwrap_or(&ScaleMode::Keep);
-        let color = self.bg.clone().unwrap_or(RGBA::new(255, 255, 255, 255));
 
         let mut any_missing = false;
         let width = if let Some(w) = size.width() {

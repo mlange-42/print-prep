@@ -1,15 +1,17 @@
 //! `print-prep` operations
-use crate::util::image::ImageFormatError;
-use crate::util::{ImageUtil, PathUtil};
+use crate::util::{ImageFormatError, ImageUtil, PathUtil};
 use image::DynamicImage;
 use indicatif::ProgressBar;
 use rayon::prelude::*;
 use std::error::Error;
 use std::path::PathBuf;
 
-pub mod list;
-pub mod scale;
+mod list;
+mod prep;
+mod scale;
+
 pub use list::ListFiles;
+pub use prep::PrepareImage;
 pub use scale::ScaleImage;
 
 /// Trait for all image operations.
