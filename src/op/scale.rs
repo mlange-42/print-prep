@@ -2,7 +2,7 @@
 
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
-use crate::units::color::RGBA;
+use crate::units::color::Color;
 use crate::units::{Length, LengthUnit, Scale, ScaleMode, Size};
 use crate::OperationParametersError;
 use image::imageops::FilterType;
@@ -56,7 +56,7 @@ pub struct ScaleImage {
 
     /// Background color for `--mode fill`. Default `white`.
     #[structopt(short, long)]
-    bg: Option<RGBA>,
+    bg: Option<Color>,
 }
 impl ScaleImage {
     fn check(&self) -> Result<(), Box<dyn Error>> {
@@ -90,7 +90,7 @@ impl ImageIoOperation for ScaleImage {
         let dpi = self.dpi.unwrap_or(300.0);
         let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
         let mode = self.mode.as_ref().unwrap_or(&ScaleMode::Keep);
-        let color = self.bg.clone().unwrap_or(RGBA::new(255, 255, 255, 255));
+        let color = self.bg.clone().unwrap_or(Color::new(255, 255, 255, 255));
 
         let size = if let Some(s) = &self.size {
             s.to(&LengthUnit::Px, dpi)

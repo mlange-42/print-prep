@@ -2,7 +2,7 @@
 
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
-use crate::units::color::RGBA;
+use crate::units::color::Color;
 use image::imageops::FilterType;
 use image::DynamicImage;
 use std::error::Error;
@@ -38,7 +38,7 @@ pub struct PrepareImage {
 
     /// Background color. Default `white`.
     #[structopt(short, long)]
-    bg: Option<RGBA>,
+    bg: Option<Color>,
 }
 impl PrepareImage {
     fn check(&self) -> Result<(), Box<dyn Error>> {
@@ -66,7 +66,7 @@ impl ImageIoOperation for PrepareImage {
 
         let dpi = self.dpi.unwrap_or(300.0);
         let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
-        let color = self.bg.clone().unwrap_or(RGBA::new(255, 255, 255, 255));
+        let color = self.bg.clone().unwrap_or(Color::new(255, 255, 255, 255));
 
         //Ok(result)
         unimplemented!()
