@@ -11,20 +11,17 @@ use structopt::StructOpt;
 /// Scale images.
 #[derive(StructOpt, Debug)]
 pub struct ScaleImage {
-    /// Output image size.
+    /// Output image size. Use either `--size` or `--scale`.
     /// Examples: `100px/.`, `./15cm`, `8in/6in`.
-    /// Use either `--size` or `--scale`.
     #[structopt(long)]
     size: Option<Size>,
-    /// Output image scale.
+    /// Output image scale. Use either `--size` or `--scale`.
     /// Examples: `0.5`, `50%`, `20%/10%`.
-    /// Use either `--size` or `--scale`.
     #[structopt(long)]
     scale: Option<Scale>,
-    /// Scaling mode.
+    /// Scaling mode. Must be given when using `--size` with width and height.
     /// One of `(keep|stretch|crop|fill)`.
     /// Default: `keep`.
-    /// Must be given when using `--size` with width and height.
     #[structopt(long)]
     mode: Option<ScaleMode>,
     /// Filter type for image scaling.

@@ -11,6 +11,19 @@ impl PathUtil {
         path.extension()
             .and_then(|ext| ext.to_str().and_then(|ext| Some(ext.to_lowercase())))
     }
+    /// Get the file's base name from a path (name without extension).
+    pub fn stem(path: &PathBuf) -> Option<String> {
+        path.file_stem()
+            .and_then(|st| st.to_str().and_then(|st| Some(st.to_string())))
+    }
+    /// Get the file's base name from a path (name without extension).
+    pub fn out_path(in_path: &PathBuf, out_pattern: &str) -> Option<PathBuf> {
+        let name = PathUtil::stem(in_path);
+        match name {
+            Some(name) => Some(PathBuf::from(out_pattern.replace("*", &name))),
+            None => None,
+        }
+    }
     /// List all files for a pattern
     pub fn list_files(pattern: &str) -> Result<Vec<PathBuf>, glob::PatternError> {
         let paths: glob::Paths = glob::glob(pattern)?;

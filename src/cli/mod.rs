@@ -19,11 +19,24 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(verbatim_doc_comment)]
 pub struct Cli {
-    /// List of input files or patterns.
+    /// List of input files or patterns. On Unix systems, patterns must be quoted!
+    ///
+    /// Examples:
+    /// --input "path/to/*.jpg"
+    /// --input "path/to/*.jpg" "other/path/to/*.jpg"
+    /// --input image-0001.jpg image-0002.jpg image-0003.jpg
+    ///
+    #[structopt(verbatim_doc_comment)]
     #[structopt(short, long)]
     pub input: Vec<String>,
 
-    /// Output path. Use `*` as placeholder for the original file name.
+    /// Output path. Use `*` as placeholder for the original base file name.
+    /// Used to determine output image type.
+    ///
+    /// Examples:
+    /// --output "path/to/*-out.jpg"
+    ///
+    #[structopt(verbatim_doc_comment)]
     #[structopt(short, long)]
     pub output: String,
 

@@ -36,13 +36,10 @@ fn main() {
     files.par_iter().for_each(|file: &PathBuf| {
         bar.inc(1);
 
-        let name = file
-            .file_stem()
-            .exit(&format!("Unexpected path format in {:?}", file))
-            .to_str()
-            .unwrap()
-            .to_string();
-        let out_path = PathBuf::from(cli.output.replace("*", &name));
+        let out_path = PathUtil::out_path(file, &cli.output).exit(&format!(
+            "Unable to generate output file name from {:?}",
+            cli.output
+        ));
 
         let op = cli.op.get_op();
         let input = image::open(file).exit(&format!("Unable to read image {:?}", file));
