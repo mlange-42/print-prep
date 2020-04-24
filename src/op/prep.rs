@@ -34,11 +34,11 @@ pub struct PrepareImage {
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
     /// Default: `cubic`.
     #[structopt(short, long, parse(try_from_str = parse::parse_filter_type))]
-    filter: Option<FilterType>,
+    pub filter: Option<FilterType>,
 
     /// Background color. Default `white`.
     #[structopt(short, long)]
-    bg: Option<Color>,
+    pub bg: Option<Color>,
 }
 impl PrepareImage {
     fn check(&self) -> Result<(), Box<dyn Error>> {

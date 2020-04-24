@@ -31,32 +31,32 @@ pub struct ScaleImage {
     /// Output image size. Use either `--size` or `--scale`.
     /// Examples: `100px/.`, `./15cm`, `8in/6in`.
     #[structopt(long)]
-    size: Option<Size>,
+    pub size: Option<Size>,
 
     /// Output image scale. Use either `--size` or `--scale`.
     /// Examples: `0.5`, `50%`, `20%/10%`.
     #[structopt(long)]
-    scale: Option<Scale>,
+    pub scale: Option<Scale>,
 
     /// Scaling mode. Must be given when using `--size` with width and height.
     /// One of `(keep|stretch|crop|fill)`.
     /// Default: `keep`.
     #[structopt(short, long)]
-    mode: Option<ScaleMode>,
+    pub mode: Option<ScaleMode>,
 
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
     /// Default: `cubic`.
     #[structopt(short, long, parse(try_from_str = parse::parse_filter_type))]
-    filter: Option<FilterType>,
+    pub filter: Option<FilterType>,
 
     /// Image resolution for size not in px. Default `300`.
     #[structopt(short, long)]
-    dpi: Option<f32>,
+    pub dpi: Option<f32>,
 
     /// Background color for `--mode fill`. Default `white`.
     #[structopt(short, long)]
-    bg: Option<Color>,
+    pub bg: Option<Color>,
 }
 impl ScaleImage {
     fn check(&self) -> Result<(), Box<dyn Error>> {
