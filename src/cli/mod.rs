@@ -2,7 +2,7 @@
 
 pub mod parse;
 
-use crate::op::{ImageOperation, ScaleImage};
+use crate::op::{ImageOperation, ListFiles, ScaleImage};
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
@@ -53,6 +53,8 @@ pub struct Cli {
 pub enum Operation {
     /// Scales images.
     Scale(ScaleImage),
+    /// List files found by input pattern.
+    List(ListFiles),
 }
 
 impl Operation {
@@ -60,6 +62,7 @@ impl Operation {
     pub fn get_op(&self) -> &dyn ImageOperation {
         match self {
             Operation::Scale(sc) => sc,
+            Operation::List(ls) => ls,
         }
     }
 }

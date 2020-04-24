@@ -1,3 +1,5 @@
+//! Scale images.
+
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::RGBA;

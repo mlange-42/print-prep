@@ -16,6 +16,11 @@ impl PathUtil {
         path.file_stem()
             .and_then(|st| st.to_str().and_then(|st| Some(st.to_string())))
     }
+    /// Get the file's name from a path (with extension).
+    pub fn name(path: &PathBuf) -> Option<String> {
+        path.file_name()
+            .and_then(|st| st.to_str().and_then(|st| Some(st.to_string())))
+    }
     /// Get the file's base name from a path (name without extension).
     pub fn out_path(in_path: &PathBuf, out_pattern: &str) -> Option<PathBuf> {
         let name = PathUtil::stem(in_path);

@@ -1,22 +1,22 @@
 //! `print-prep` operations
-use std::error::Error;
-
-pub mod scale;
-
 use crate::util::image::ImageFormatError;
 use crate::util::{ImageUtil, PathUtil};
 use image::DynamicImage;
 use indicatif::ProgressBar;
 use rayon::prelude::*;
-pub use scale::ScaleImage;
+use std::error::Error;
 use std::path::PathBuf;
+
+pub mod list;
+pub mod scale;
+pub use list::ListFiles;
+pub use scale::ScaleImage;
 
 /// Trait for all image operations.
 pub trait ImageOperation {
     fn execute(&self, files: &[PathBuf]) -> Result<(), Box<dyn Error>>;
 }
 
-/// Trait for all image operations.
 pub trait ImageIoOperation: ImageOperation + Send + Sync {
     fn output(&self) -> &str;
     fn quality(&self) -> &Option<u8>;
@@ -74,6 +74,30 @@ pub trait ImageIoOperation: ImageOperation + Send + Sync {
             })
             .collect::<Result<(), ImageFormatError>>()?;
         bar.finish_and_clear();
+        Ok(())
+    }
+}
+
+pub trait PathIterOperation: ImageOperation + Send + Sync {
+    fn process_path(&self, path: &PathBuf) -> Result<(), Box<dyn Error>>;
+    fn execute(&self, files: &[PathBuf]) -> Result<(), Box<dyn Error>> {
+        files
+            .par_iter()
+            .map(|file: &PathBuf| {
+                match self.process_path(&file) {
+                    Ok(_) => {}
+                    Err(e) => {
+                        return Err(ImageFormatError(format!(
+                            "Unable to process path {:?}: {:?}",
+                            file,
+                            e.to_string()
+                        )));
+                    }
+                }
+
+                Ok(())
+            })
+            .collect::<Result<(), ImageFormatError>>()?;
         Ok(())
     }
 }

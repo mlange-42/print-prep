@@ -14,7 +14,7 @@ fn main() {
     let cli = parse_args().unwrap();
 
     if cli.debug {
-        println!("{:#?}", cli);
+        eprintln!("{:#?}", cli);
     }
 
     if let Some(threads) = cli.threads {
@@ -39,7 +39,7 @@ fn main() {
         }
     };
 
-    println!("Success! Total time: {:?}", start.elapsed());
+    eprintln!("Success! Total time: {:?}", start.elapsed());
 
     if cli.wait {
         dont_disappear::any_key_to_continue::default();
