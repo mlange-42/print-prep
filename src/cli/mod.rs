@@ -30,20 +30,6 @@ pub struct Cli {
     #[structopt(short, long)]
     pub input: Vec<String>,
 
-    /// Output path. Use `*` as placeholder for the original base file name.
-    /// Used to determine output image type.
-    ///
-    /// Examples:
-    /// --output "path/to/*-out.jpg"
-    ///
-    #[structopt(verbatim_doc_comment)]
-    #[structopt(short, long)]
-    pub output: String,
-
-    /// Image quality for JPEG output in percent. Optional, default `95`.
-    #[structopt(short, long)]
-    pub quality: Option<u8>,
-
     /// Number of threads for parallel processing. Optional, default: number of processors.
     #[structopt(short, long)]
     pub threads: Option<usize>,

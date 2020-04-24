@@ -109,7 +109,7 @@ impl fmt::Display for InvalidImagePathError {
 
 /// Error type for invalid image format.
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct ImageFormatError(String);
+pub struct ImageFormatError(pub String);
 
 impl Error for ImageFormatError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
@@ -117,7 +117,6 @@ impl Error for ImageFormatError {
         None
     }
 }
-
 impl fmt::Display for ImageFormatError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         self.0.fmt(f)
