@@ -1,5 +1,7 @@
 # print-prep
 
+[![Build Status](https://travis-ci.com/mlange-42/print-prep.svg?branch=master)](https://travis-ci.com/mlange-42/print-prep)
+
 Command line tool for preparing photos for printing, and other bulk image operations.
 
 * **[Download binaries](https://github.com/mlange-42/print-prep/releases/)**
