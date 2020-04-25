@@ -1,6 +1,6 @@
 //! Predefined exact formats
 
-use crate::units::{Length, Size};
+use crate::units::Size;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
@@ -27,7 +27,7 @@ lazy_static! {
 
 /// Error type for invalid print formats (missing dimensions).
 #[derive(Debug, Clone, PartialEq, Eq)]
-pub struct PrintFormatError(String);
+pub struct PrintFormatError(pub String);
 
 impl Error for PrintFormatError {
     fn source(&self) -> Option<&(dyn Error + 'static)> {
