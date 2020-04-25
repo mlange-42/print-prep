@@ -10,18 +10,18 @@ use std::str::FromStr;
 /// Can be parsed from stings of format `width/height`.
 /// `width` and `height´ can be in units px, cm or inch.
 /// Examples:
-/// ```ignore
+/// <pre>
 /// 10cm/5cm
 /// 1024px/512px
 /// 5in/3in
-/// ```
+/// </pre>
 ///
 /// `.` can be used as placeholder.
 /// Examples:
-/// ```ignore
+/// <pre>
 /// 15cm/.
 /// ./512px
-/// ```
+/// </pre>
 #[derive(Debug, PartialEq)]
 pub struct Size {
     width: Option<Length>,

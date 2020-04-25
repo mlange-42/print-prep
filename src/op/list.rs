@@ -12,10 +12,10 @@ use structopt::StructOpt;
 pub struct ListFiles {
     /// Prints the full path.
     #[structopt(short, long)]
-    path: bool,
+    pub path: bool,
     /// Prints the absolute path.
     #[structopt(short, long)]
-    absolute: bool,
+    pub absolute: bool,
 }
 
 impl ImageOperation for ListFiles {

@@ -22,9 +22,9 @@ pub struct Cli {
     /// List of input files or patterns. On Unix systems, patterns must be quoted!
     ///
     /// Examples:
-    /// --input "path/to/*.jpg"
-    /// --input "path/to/*.jpg" "other/path/to/*.jpg"
-    /// --input image-0001.jpg image-0002.jpg image-0003.jpg
+    /// `--input "path/to/*.jpg"`
+    /// `--input "path/to/*.jpg" "other/path/to/*.jpg"`
+    /// `--input image-0001.jpg image-0002.jpg image-0003.jpg`
     ///
     #[structopt(verbatim_doc_comment)]
     #[structopt(short, long)]

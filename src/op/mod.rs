@@ -14,11 +14,12 @@ pub use list::ListFiles;
 pub use prep::PrepareImage;
 pub use scale::ScaleImage;
 
-/// Trait for all image operations.
+/// Super-trait for all image operations.
 pub trait ImageOperation {
     fn execute(&self, files: &[PathBuf]) -> Result<(), Box<dyn Error>>;
 }
 
+/// Trait for image operations that produce one output image per input image.
 pub trait ImageIoOperation: ImageOperation + Send + Sync {
     fn output(&self) -> &str;
     fn quality(&self) -> &Option<u8>;
@@ -80,6 +81,7 @@ pub trait ImageIoOperation: ImageOperation + Send + Sync {
     }
 }
 
+/// Trait for image operations that do something for every supplied path.
 pub trait PathIterOperation: ImageOperation + Send + Sync {
     fn process_path(&self, path: &PathBuf) -> Result<(), Box<dyn Error>>;
     fn execute(&self, files: &[PathBuf]) -> Result<(), Box<dyn Error>> {

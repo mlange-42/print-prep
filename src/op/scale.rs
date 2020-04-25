@@ -2,7 +2,7 @@
 
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
-use crate::units::color::RGBA;
+use crate::units::color::Color;
 use crate::units::{Length, LengthUnit, Scale, ScaleMode, Size};
 use crate::OperationParametersError;
 use image::imageops::FilterType;
@@ -31,32 +31,32 @@ pub struct ScaleImage {
     /// Output image size. Use either `--size` or `--scale`.
     /// Examples: `100px/.`, `./15cm`, `8in/6in`.
     #[structopt(long)]
-    size: Option<Size>,
+    pub size: Option<Size>,
 
     /// Output image scale. Use either `--size` or `--scale`.
     /// Examples: `0.5`, `50%`, `20%/10%`.
     #[structopt(long)]
-    scale: Option<Scale>,
+    pub scale: Option<Scale>,
 
     /// Scaling mode. Must be given when using `--size` with width and height.
     /// One of `(keep|stretch|crop|fill)`.
     /// Default: `keep`.
     #[structopt(short, long)]
-    mode: Option<ScaleMode>,
+    pub mode: Option<ScaleMode>,
 
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
     /// Default: `cubic`.
     #[structopt(short, long, parse(try_from_str = parse::parse_filter_type))]
-    filter: Option<FilterType>,
+    pub filter: Option<FilterType>,
 
     /// Image resolution for size not in px. Default `300`.
     #[structopt(short, long)]
-    dpi: Option<f32>,
+    pub dpi: Option<f32>,
 
     /// Background color for `--mode fill`. Default `white`.
     #[structopt(short, long)]
-    bg: Option<RGBA>,
+    pub bg: Option<Color>,
 }
 impl ScaleImage {
     fn check(&self) -> Result<(), Box<dyn Error>> {
@@ -90,7 +90,7 @@ impl ImageIoOperation for ScaleImage {
         let dpi = self.dpi.unwrap_or(300.0);
         let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
         let mode = self.mode.as_ref().unwrap_or(&ScaleMode::Keep);
-        let color = self.bg.clone().unwrap_or(RGBA::new(255, 255, 255, 255));
+        let color = self.bg.clone().unwrap_or(Color::new(255, 255, 255, 255));
 
         let size = if let Some(s) = &self.size {
             s.to(&LengthUnit::Px, dpi)

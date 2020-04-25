@@ -43,17 +43,17 @@ impl FromStr for ScaleMode {
 /// Can be parsed from stings of format `width/height` or `scale`.
 /// `width` and `height´ can be fractions or percentages.
 /// Examples:
-/// ```ignore
+/// <pre>
 /// 50%
 /// 20%/50%
 /// 0.6/0.8
-/// ```
+/// </pre>
 ///
 /// `.` can be used as placeholder.
 /// Examples:
-/// ```ignore
+/// <pre>
 /// ./20%
-/// ```
+/// </pre>
 #[derive(Debug, PartialEq)]
 pub struct Scale {
     width: f32,
