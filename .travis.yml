@@ -8,6 +8,11 @@ matrix:
     - rust: nightly
   fast_finish: true
 
+branches:
+  only:
+    - master
+    - dev
+
 script:
   - cargo build --verbose
   - cargo test --verbose
