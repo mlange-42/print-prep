@@ -2,10 +2,11 @@
 
 use crate::ParseEnumError;
 use std::error::Error;
+use std::fmt;
 use std::str::FromStr;
 
 /// A length with unit.
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Length {
     value: f32,
     unit: LengthUnit,
@@ -85,6 +86,12 @@ impl FromStr for Length {
     }
 }
 
+impl fmt::Display for Length {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.value, self.unit)
+    }
+}
+
 /// Trait to convert numbers to lengths with unit.
 pub trait ToLength {
     /// Converts the number to a length in centimeters.
@@ -152,6 +159,19 @@ impl FromStr for LengthUnit {
                 s
             ))),
         }
+    }
+}
+impl fmt::Display for LengthUnit {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(
+            f,
+            "{}",
+            match self {
+                LengthUnit::Cm => "cm",
+                LengthUnit::Inch => "in",
+                LengthUnit::Px => "px",
+            }
+        )
     }
 }
 
@@ -225,5 +245,16 @@ mod test {
 
         assert_eq!(px.to(&LengthUnit::Cm, 300.0), cm);
         assert_eq!(px.to(&LengthUnit::Inch, 300.0), inch);
+    }
+
+    #[test]
+    fn display() {
+        let cm = 254.cm();
+        let inch = 100.inch();
+        let px = 30000.px();
+
+        assert_eq!(cm.to_string(), "254cm");
+        assert_eq!(inch.to_string(), "100in");
+        assert_eq!(px.to_string(), "30000px");
     }
 }

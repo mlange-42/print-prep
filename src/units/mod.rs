@@ -1,6 +1,7 @@
 //! Measures and units
 
 pub mod color;
+pub mod format;
 mod length;
 mod scale;
 mod size;

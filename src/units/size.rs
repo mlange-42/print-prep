@@ -3,6 +3,7 @@
 use crate::units::length::{Length, LengthUnit};
 use crate::ParseStructError;
 use std::error::Error;
+use std::fmt;
 use std::str::FromStr;
 
 /// Absolute scaling parameters.
@@ -22,7 +23,7 @@ use std::str::FromStr;
 /// 15cm/.
 /// ./512px
 /// </pre>
-#[derive(Debug, PartialEq)]
+#[derive(Debug, PartialEq, Clone)]
 pub struct Size {
     width: Option<Length>,
     height: Option<Length>,
@@ -99,6 +100,19 @@ impl FromStr for Size {
         Ok(Size { width, height })
     }
 }
+impl fmt::Display for Size {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let str1 = self
+            .width
+            .as_ref()
+            .map_or(".".to_string(), |l| l.to_string());
+        let str2 = self
+            .height
+            .as_ref()
+            .map_or(".".to_string(), |l| l.to_string());
+        write!(f, "{}/{}", str1, str2)
+    }
+}
 
 #[cfg(test)]
 mod test {
@@ -124,5 +138,16 @@ mod test {
         assert_eq!(size.width.as_ref().unwrap().value(), 10.0);
         assert_eq!(size.width.as_ref().unwrap().unit(), &LengthUnit::Inch);
         assert!(size.height.is_none());
+    }
+
+    #[test]
+    fn display() {
+        let str = "10in/.";
+        let size: Size = str.parse().unwrap();
+        assert_eq!(size.to_string(), str);
+
+        let str = "15cm/10cm";
+        let size: Size = str.parse().unwrap();
+        assert_eq!(size.to_string(), str);
     }
 }
