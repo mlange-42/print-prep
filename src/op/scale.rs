@@ -4,9 +4,10 @@ use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::Color;
 use crate::units::{Length, LengthUnit, Scale, ScaleMode, Size};
+use crate::util::ImageUtil;
 use crate::OperationParametersError;
 use image::imageops::FilterType;
-use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
+use image::{DynamicImage, GenericImageView};
 use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -49,6 +50,11 @@ pub struct ScaleImage {
     /// Default: `cubic`.
     #[structopt(short, long, parse(try_from_str = parse::parse_filter_type))]
     pub filter: Option<FilterType>,
+
+    /// Enable incremental scaling.
+    /// For scaling to small sizes, scales down in multiple steps, to 50% per step, averaging over 2x2 pixels.
+    #[structopt(long)]
+    pub incremental: bool,
 
     /// Image resolution for size not in px. Default `300`.
     #[structopt(short, long)]
@@ -121,6 +127,11 @@ impl ImageIoOperation for ScaleImage {
             ((w as f64 / image.width() as f64) * image.height() as f64).round() as u32
         };
 
+        let mode = if any_missing { &ScaleMode::Keep } else { mode };
+        let result =
+            ImageUtil::scale_image(image, width, height, mode, filter, &color, self.incremental);
+
+        /*
         let result = if any_missing {
             image.resize(width, height, *filter)
         } else {
@@ -147,7 +158,7 @@ impl ImageIoOperation for ScaleImage {
                     result
                 }
             }
-        };
-        Ok(result)
+        };*/
+        result
     }
 }

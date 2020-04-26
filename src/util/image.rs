@@ -1,8 +1,11 @@
 //! Image utilities
 
+use crate::units::color::Color;
+use crate::units::ScaleMode;
 use crate::util::PathUtil;
 use image::flat::SampleLayout;
-use image::DynamicImage;
+use image::imageops::FilterType;
+use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 use path_absolutize::Absolutize;
 use std::error::Error;
 use std::fmt;
@@ -13,6 +16,95 @@ use std::path::PathBuf;
 pub struct ImageUtil {}
 
 impl ImageUtil {
+    pub fn scale_image(
+        image: &DynamicImage,
+        width: u32,
+        height: u32,
+        mode: &ScaleMode,
+        filter: &FilterType,
+        background: &Color,
+        incremental: bool,
+    ) -> Result<DynamicImage, Box<dyn Error>> {
+        if incremental && image.width() > 3 * width && image.height() > 3 * height {
+            let mut img = Self::scale_to_half(image)?;
+            while img.width() > 3 * width && img.height() > 3 * height {
+                img = Self::scale_to_half(&img)?;
+            }
+            Self::scale_image_simple(&img, width, height, mode, filter, background)
+        } else {
+            Self::scale_image_simple(image, width, height, mode, filter, background)
+        }
+    }
+
+    pub fn scale_image_simple(
+        image: &DynamicImage,
+        width: u32,
+        height: u32,
+        mode: &ScaleMode,
+        filter: &FilterType,
+        background: &Color,
+    ) -> Result<DynamicImage, Box<dyn Error>> {
+        let result = match mode {
+            ScaleMode::Keep => image.resize(width, height, *filter),
+            ScaleMode::Stretch => image.resize_exact(width, height, *filter),
+            ScaleMode::Crop => image.resize_to_fill(width, height, *filter),
+            ScaleMode::Fill => {
+                let temp = image.resize(width, height, *filter);
+                let mut result = if temp.color().has_alpha() {
+                    DynamicImage::new_rgba8(width, height)
+                } else {
+                    DynamicImage::new_rgb8(width, height)
+                };
+                let col = Rgba(*background.channels());
+                for y in 0..result.height() {
+                    for x in 0..result.width() {
+                        result.put_pixel(x, y, col);
+                    }
+                }
+                let x = (result.width() - temp.width()) / 2;
+                let y = (result.height() - temp.height()) / 2;
+                result.copy_from(&temp, x, y)?;
+                result
+            }
+        };
+        Ok(result)
+    }
+
+    fn scale_to_half(image: &DynamicImage) -> Result<DynamicImage, Box<dyn Error>> {
+        let width = image.width() / 2;
+        let height = image.height() / 2;
+
+        let (mut result, channels) = if image.color().has_alpha() {
+            (DynamicImage::new_rgba8(width, height), 4)
+        } else {
+            (DynamicImage::new_rgb8(width, height), 3)
+        };
+
+        let mut col = Rgba([0, 0, 0, 255]);
+        let mut mean: [u16; 4] = [0, 0, 0, 255];
+        for y in 0..result.height() {
+            for x in 0..result.width() {
+                for c in 0..channels {
+                    mean[c] = 0;
+                }
+                for yy in (y * 2)..(y * 2 + 2) {
+                    for xx in (x * 2)..(x * 2 + 2) {
+                        let pix = image.get_pixel(xx, yy);
+                        for c in 0..channels {
+                            mean[c] += pix.0[c] as u16;
+                        }
+                    }
+                }
+                for c in 0..channels {
+                    col[c] = (mean[c] as f32 / 4.0).round() as u8;
+                }
+                result.put_pixel(x, y, col);
+            }
+        }
+
+        Ok(result)
+    }
+
     /// Saves an image to a file
     pub fn save_image(
         image: DynamicImage,
