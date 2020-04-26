@@ -3,10 +3,11 @@
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::Color;
-use crate::units::Size;
 use crate::units::{format, LengthUnit};
+use crate::units::{Borders, Size};
+use crate::util::ImageUtil;
 use image::imageops::FilterType;
-use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
+use image::{DynamicImage, GenericImageView};
 use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -31,7 +32,7 @@ pub struct PrepareImage {
 
     /// Image resolution. Default `300`.
     #[structopt(short, long)]
-    pub dpi: Option<f32>,
+    pub dpi: Option<f64>,
 
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
@@ -47,6 +48,22 @@ pub struct PrepareImage {
     #[structopt(long)]
     pub format: Size,
 
+    /// Maximum image size, excl. padding.
+    #[structopt(name = "image-size", long)]
+    pub image_size: Option<Size>,
+
+    /// Maximum image size, incl. padding.
+    #[structopt(name = "framed-size", long)]
+    pub framed_size: Option<Size>,
+
+    /// Padding.
+    #[structopt(long)]
+    pub padding: Option<Borders>,
+
+    /// Margins.
+    #[structopt(long)]
+    pub margins: Option<Borders>,
+
     /// Background color. Default `white`.
     #[structopt(short, long)]
     pub bg: Option<Color>,
@@ -61,6 +78,36 @@ impl PrepareImage {
             return Err(Box::new(format::PrintFormatError(format!(
                 "Missing dimension in print format {}",
                 &self.format
+            ))));
+        }
+
+        let mut count = 0;
+        for v in [&self.image_size, &self.framed_size].iter() {
+            if v.is_some() {
+                count += 1;
+            }
+        }
+        for v in [&self.padding, &self.margins].iter() {
+            if v.is_some() {
+                count += 1;
+            }
+        }
+
+        if count != 2 {
+            return Err(Box::new(format::PrintFormatError(format!(
+                "Over- or under-determined print format. \
+                Exactly two of the following options must be given: \
+                `image-size`, `framed-size`, `padding`, `margins`. \
+                The only invalid combination is `framed-size` and `margins`"
+            ))));
+        }
+
+        if self.framed_size.is_some() && self.margins.is_some() {
+            return Err(Box::new(format::PrintFormatError(format!(
+                "Invalid combination of print format options. \
+                Exactly two of the following options must be given: \
+                `image-size`, `framed-size`, `padding`, `margins`. \
+                The only invalid combination is `framed-size` and `margins`"
             ))));
         }
 
@@ -107,13 +154,7 @@ impl ImageIoOperation for PrepareImage {
         } else {
             DynamicImage::new_rgb8(width, height)
         };
-
-        let col = Rgba(*color.channels());
-        for y in 0..result.height() {
-            for x in 0..result.width() {
-                result.put_pixel(x, y, col);
-            }
-        }
+        ImageUtil::fill_image(&mut result, color.channels());
 
         Ok(result)
     }

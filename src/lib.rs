@@ -44,7 +44,7 @@ where
             Ok(v) => v,
             Err(e) => {
                 eprintln!("Terminated with ERROR:");
-                eprintln!("{} ({:?})", message, e);
+                eprintln!("{} ({})", message, e);
                 exit(1);
             }
         }
@@ -63,7 +63,7 @@ impl Error for ParseEnumError {
 }
 impl fmt::Display for ParseEnumError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -79,7 +79,7 @@ impl Error for ParseStructError {
 }
 impl fmt::Display for ParseStructError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -95,6 +95,6 @@ impl Error for OperationParametersError {
 }
 impl fmt::Display for OperationParametersError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }

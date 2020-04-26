@@ -45,7 +45,7 @@ impl Borders {
     }
 
     /// Converts these borders to another unit.
-    pub fn to(&self, unit: &LengthUnit, dpi: f32) -> Borders {
+    pub fn to(&self, unit: &LengthUnit, dpi: f64) -> Borders {
         Borders {
             top: self.top.to(unit, dpi),
             right: self.right.to(unit, dpi),

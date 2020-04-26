@@ -199,7 +199,7 @@ impl Error for InvalidImagePathError {
 
 impl fmt::Display for InvalidImagePathError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -215,7 +215,7 @@ impl Error for ImageFormatError {
 }
 impl fmt::Display for ImageFormatError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
 

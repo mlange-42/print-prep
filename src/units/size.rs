@@ -47,7 +47,7 @@ impl Size {
         &self.height
     }
     /// Converts this size to another unit.
-    pub fn to(&self, unit: &LengthUnit, dpi: f32) -> Size {
+    pub fn to(&self, unit: &LengthUnit, dpi: f64) -> Size {
         Size {
             width: self.width.as_ref().and_then(|w| Some(w.to(unit, dpi))),
             height: self.height.as_ref().and_then(|w| Some(w.to(unit, dpi))),

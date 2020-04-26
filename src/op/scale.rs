@@ -58,7 +58,7 @@ pub struct ScaleImage {
 
     /// Image resolution for size not in px. Default `300`.
     #[structopt(short, long)]
-    pub dpi: Option<f32>,
+    pub dpi: Option<f64>,
 
     /// Background color for `--mode fill`. Default `white`.
     #[structopt(short, long)]
