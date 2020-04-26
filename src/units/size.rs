@@ -53,6 +53,10 @@ impl Size {
             height: self.height.as_ref().and_then(|w| Some(w.to(unit, dpi))),
         }
     }
+    /// Rotates this size by 90° clockwise (i.e. swaps width and height).
+    pub fn rotate_90(&self) -> Size {
+        Size::new(self.height.clone(), self.width.clone()).unwrap()
+    }
     /// Does this size require a dpi value for conversion to px?
     pub fn needs_dpi(&self) -> bool {
         let mut needs = false;
@@ -114,6 +118,69 @@ impl fmt::Display for Size {
     }
 }
 
+#[derive(Debug, PartialEq, Clone)]
+pub struct FixSize {
+    width: Length,
+    height: Length,
+}
+
+impl FixSize {
+    pub fn new(width: Length, height: Length) -> Self {
+        FixSize { width, height }
+    }
+    pub fn px(width: i32, height: i32) -> Self {
+        FixSize {
+            width: Length::px(width),
+            height: Length::px(height),
+        }
+    }
+    /// Width of this size.
+    pub fn width(&self) -> &Length {
+        &self.width
+    }
+    /// Height of this size.
+    pub fn height(&self) -> &Length {
+        &self.height
+    }
+    /// Converts this size to another unit.
+    pub fn to(&self, unit: &LengthUnit, dpi: f64) -> FixSize {
+        FixSize {
+            width: self.width.to(unit, dpi),
+            height: self.height.to(unit, dpi),
+        }
+    }
+    /// Rotates this size by 90° clockwise (i.e. swaps width and height).
+    pub fn rotate_90(&self) -> FixSize {
+        FixSize::new(self.height.clone(), self.width.clone())
+    }
+    /// Does this size require a dpi value for conversion to px?
+    pub fn needs_dpi(&self) -> bool {
+        self.width.needs_dpi() || self.height.needs_dpi()
+    }
+}
+
+impl FromStr for FixSize {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<_> = s.split("/").collect();
+        if parts.len() != 2 {
+            return Err(Box::new(ParseStructError(format!(
+                "Unexpected size format in {}, expects `width/height`",
+                s
+            ))));
+        }
+        let width = parts[0].parse()?;
+        let height = parts[1].parse()?;
+        Ok(FixSize { width, height })
+    }
+}
+impl fmt::Display for FixSize {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}/{}", self.width, self.height)
+    }
+}
+
 #[cfg(test)]
 mod test {
     use crate::units::length::LengthUnit;
@@ -139,7 +206,13 @@ mod test {
         assert_eq!(size.width.as_ref().unwrap().unit(), &LengthUnit::Inch);
         assert!(size.height.is_none());
     }
-
+    #[test]
+    fn rotate() {
+        let str = "10in/.";
+        let size: Size = str.parse().unwrap();
+        let rot = size.rotate_90();
+        assert_eq!(rot.to_string(), "./10in");
+    }
     #[test]
     fn display() {
         let str = "10in/.";

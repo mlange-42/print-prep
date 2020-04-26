@@ -1,19 +1,13 @@
 //! Predefined exact formats
 
-use crate::units::Size;
+use crate::units::FixSize;
 use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 
 /// Converts format in cm to exact print formats in inches.
-pub fn to_print_format(size: &Size) -> Result<Size, PrintFormatError> {
+pub fn to_print_format(size: &FixSize) -> Result<FixSize, PrintFormatError> {
     let str = size.to_string();
-    if size.width().is_none() || size.height().is_none() {
-        return Err(PrintFormatError(format!(
-            "Unable to determine print size. Missing dimension in size {}",
-            &str
-        )));
-    }
     if FORMATS.contains_key::<str>(&str) {
         Ok(FORMATS.get::<str>(&str).unwrap().parse().unwrap())
     } else {
@@ -71,11 +65,11 @@ fn create_formats() -> HashMap<&'static str, &'static str> {
 #[cfg(test)]
 mod test {
     use crate::units::format::to_print_format;
-    use crate::units::size::Size;
+    use crate::units::FixSize;
 
     #[test]
     fn print_formats() {
-        let size: Size = "15cm/10cm".parse().unwrap();
+        let size: FixSize = "15cm/10cm".parse().unwrap();
         let format = to_print_format(&size).unwrap();
 
         assert_eq!(format.to_string(), "6in/4in".to_string());

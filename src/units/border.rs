@@ -23,6 +23,14 @@ impl Borders {
             left,
         }
     }
+    pub fn px(top: i32, right: i32, bottom: i32, left: i32) -> Self {
+        Borders {
+            top: Length::px(top),
+            right: Length::px(right),
+            bottom: Length::px(bottom),
+            left: Length::px(left),
+        }
+    }
     pub fn all(border: Length) -> Self {
         Borders {
             top: border.clone(),
@@ -52,6 +60,15 @@ impl Borders {
             bottom: self.bottom.to(unit, dpi),
             left: self.left.to(unit, dpi),
         }
+    }
+    /// Rotates these borders by 90° clockwise.
+    pub fn rotate_90(&self) -> Borders {
+        Borders::each(
+            self.left.clone(),
+            self.top.clone(),
+            self.right.clone(),
+            self.bottom.clone(),
+        )
     }
     /// Do these borders require a dpi value for conversion to px?
     pub fn needs_dpi(&self) -> bool {
@@ -127,5 +144,14 @@ mod test {
         let borders: Borders = str.parse().unwrap();
 
         assert_eq!(borders.to_string(), str);
+    }
+
+    #[test]
+    fn rotate() {
+        let str = "1cm/2cm/3cm/4cm";
+        let borders: Borders = str.parse().unwrap();
+        let rot = borders.rotate_90();
+
+        assert_eq!(rot.to_string(), "4cm/1cm/2cm/3cm");
     }
 }
