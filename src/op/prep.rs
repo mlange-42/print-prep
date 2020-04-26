@@ -61,7 +61,7 @@ pub struct PrepareImage {
     #[structopt(long)]
     pub padding: Option<Borders>,
 
-    /// Margins.
+    /// Minimum margins.
     #[structopt(long)]
     pub margins: Option<Borders>,
 
@@ -110,18 +110,6 @@ impl PrepareImage {
             ))));
         }
 
-        /*if self.dpi.is_none() {
-            if self.framed_size.as_ref().map_or(false, |s| s.needs_dpi())
-                || self.image_size.as_ref().map_or(false, |s| s.needs_dpi())
-                || self.margins.as_ref().map_or(false, |s| s.needs_dpi())
-                || self.padding.as_ref().map_or(false, |s| s.needs_dpi())
-            {
-                return Err(Box::new(format::PrintFormatError(format!(
-                    "A dpi value is required if any length measure is not in px."
-                ))));
-            }
-        }*/
-
         Ok(())
     }
 
@@ -138,7 +126,7 @@ impl PrepareImage {
             Self::rotate_size(framed.to(&LengthUnit::Px, dpi), rotate)
         } else {
             if let Some(margins) = &self.margins {
-                let mar = margins.to(&LengthUnit::Px, dpi);
+                let mar = Self::rotate_borders(margins.to(&LengthUnit::Px, dpi), rotate);
                 FixSize::px(
                     width as i32 - mar.right().value() as i32 - mar.left().value() as i32,
                     height as i32 - mar.top().value() as i32 - mar.bottom().value() as i32,
@@ -148,7 +136,10 @@ impl PrepareImage {
                     self.image_size.as_ref().unwrap().to(&LengthUnit::Px, dpi),
                     rotate,
                 );
-                let pad = self.padding.as_ref().unwrap().to(&LengthUnit::Px, dpi);
+                let pad = Self::rotate_borders(
+                    self.padding.as_ref().unwrap().to(&LengthUnit::Px, dpi),
+                    rotate,
+                );
                 FixSize::px(
                     img.width().value() as i32
                         + pad.right().value() as i32
@@ -162,7 +153,10 @@ impl PrepareImage {
         let image = if let Some(image) = &self.framed_size {
             Self::rotate_size(image.to(&LengthUnit::Px, dpi), rotate)
         } else {
-            let pad = self.padding.as_ref().unwrap().to(&LengthUnit::Px, dpi);
+            let pad = Self::rotate_borders(
+                self.padding.as_ref().unwrap().to(&LengthUnit::Px, dpi),
+                rotate,
+            );
             FixSize::px(
                 framed.width().value() as i32
                     - pad.right().value() as i32
@@ -173,10 +167,10 @@ impl PrepareImage {
             )
         };
         let padding = if let Some(pad) = &self.padding {
-            pad.to(&LengthUnit::Px, dpi)
+            Self::rotate_borders(pad.to(&LengthUnit::Px, dpi), rotate)
         } else {
-            let hor = (framed.width().value() - image.width().value()) as i32 / 2;
-            let ver = (framed.height().value() - image.height().value()) as i32 / 2;
+            let hor = (framed.width().value() as i32 - image.width().value() as i32) / 2;
+            let ver = (framed.height().value() as i32 - image.height().value() as i32) / 2;
             Borders::px(ver, hor, ver, hor)
         };
 
@@ -203,12 +197,21 @@ impl PrepareImage {
             scaled_width + padding.left().value() as i32 + padding.right().value() as i32,
             scaled_height + padding.top().value() as i32 + padding.bottom().value() as i32,
         );
-
-        let margins = /*if let Some(mar) = &self.margins {
-            mar.to(&LengthUnit::Px, dpi)
-        } else */ {
-            let hor = (width as f64 - framed.width().value()) as i32 / 2;
-            let ver = (height as f64 - framed.height().value()) as i32 / 2;
+        let margins = if let Some(mar_orig) = &self.margins {
+            let mar = Self::rotate_borders(mar_orig.to(&LengthUnit::Px, dpi), rotate);
+            let mut diff_hor = (mar.right().value() as i32 - mar.left().value() as i32) / 2;
+            let mut diff_ver = (mar.top().value() as i32 - mar.bottom().value() as i32) / 2;
+            let hor = (width as i32 - framed.width().value() as i32) / 2;
+            let ver = (height as i32 - framed.height().value() as i32) / 2;
+            Borders::px(
+                ver + diff_ver,
+                hor + diff_hor,
+                ver - diff_ver,
+                hor - diff_hor,
+            )
+        } else {
+            let hor = (width as i32 - framed.width().value() as i32) / 2;
+            let ver = (height as i32 - framed.height().value() as i32) / 2;
             Borders::px(ver, hor, ver, hor)
         };
 
@@ -219,6 +222,13 @@ impl PrepareImage {
             size.rotate_90()
         } else {
             size
+        }
+    }
+    fn rotate_borders(borders: Borders, rotate: bool) -> Borders {
+        if rotate {
+            borders.rotate_90()
+        } else {
+            borders
         }
     }
 }

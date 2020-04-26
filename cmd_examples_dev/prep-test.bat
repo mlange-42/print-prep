@@ -4,7 +4,7 @@
   prep ^
     --output ../test_data/out/*-prep.png ^
     --format 15cm/10cm ^
-	--padding 1cm/1cm ^
-	--margins 5mm/5mm ^
+	--padding 1cm/1cm/1cm/1cm ^
+	--margins 5mm/40mm/20mm/5mm ^
 	--dpi 300
 pause

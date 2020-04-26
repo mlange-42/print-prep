@@ -6,7 +6,7 @@ use std::fmt;
 use std::str::FromStr;
 
 /// A length with unit.
-#[derive(Debug, PartialEq, Clone)]
+#[derive(PartialEq, Clone)]
 pub struct Length {
     value: f64,
     unit: LengthUnit,
@@ -95,6 +95,12 @@ impl FromStr for Length {
 }
 
 impl fmt::Display for Length {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        write!(f, "{}{}", self.value, self.unit)
+    }
+}
+
+impl fmt::Debug for Length {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
         write!(f, "{}{}", self.value, self.unit)
     }
