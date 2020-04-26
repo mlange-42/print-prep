@@ -1,4 +1,4 @@
-..\pprep ^
+..\target\release\pprep ^
   --input ../* ^
   --debug ^
   list ^
