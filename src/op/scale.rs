@@ -58,7 +58,7 @@ pub struct ScaleImage {
 
     /// Image resolution for size not in px. Default `300`.
     #[structopt(short, long)]
-    pub dpi: Option<f32>,
+    pub dpi: Option<f64>,
 
     /// Background color for `--mode fill`. Default `white`.
     #[structopt(short, long)]
@@ -131,34 +131,6 @@ impl ImageIoOperation for ScaleImage {
         let result =
             ImageUtil::scale_image(image, width, height, mode, filter, &color, self.incremental);
 
-        /*
-        let result = if any_missing {
-            image.resize(width, height, *filter)
-        } else {
-            match mode {
-                ScaleMode::Keep => image.resize(width, height, *filter),
-                ScaleMode::Stretch => image.resize_exact(width, height, *filter),
-                ScaleMode::Crop => image.resize_to_fill(width, height, *filter),
-                ScaleMode::Fill => {
-                    let temp = image.resize(width, height, *filter);
-                    let mut result = if temp.color().has_alpha() {
-                        DynamicImage::new_rgba8(width, height)
-                    } else {
-                        DynamicImage::new_rgb8(width, height)
-                    };
-                    let col = Rgba(*color.channels());
-                    for y in 0..result.height() {
-                        for x in 0..result.width() {
-                            result.put_pixel(x, y, col);
-                        }
-                    }
-                    let x = (result.width() - temp.width()) / 2;
-                    let y = (result.height() - temp.height()) / 2;
-                    result.copy_from(&temp, x, y)?;
-                    result
-                }
-            }
-        };*/
         result
     }
 }

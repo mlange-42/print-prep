@@ -16,6 +16,14 @@ use std::path::PathBuf;
 pub struct ImageUtil {}
 
 impl ImageUtil {
+    pub fn fill_image(image: &mut DynamicImage, color: &[u8; 4]) {
+        let col = Rgba(*color);
+        for y in 0..image.height() {
+            for x in 0..image.width() {
+                image.put_pixel(x, y, col);
+            }
+        }
+    }
     pub fn scale_image(
         image: &DynamicImage,
         width: u32,
@@ -55,12 +63,8 @@ impl ImageUtil {
                 } else {
                     DynamicImage::new_rgb8(width, height)
                 };
-                let col = Rgba(*background.channels());
-                for y in 0..result.height() {
-                    for x in 0..result.width() {
-                        result.put_pixel(x, y, col);
-                    }
-                }
+                Self::fill_image(&mut result, background.channels());
+
                 let x = (result.width() - temp.width()) / 2;
                 let y = (result.height() - temp.height()) / 2;
                 result.copy_from(&temp, x, y)?;
@@ -195,7 +199,7 @@ impl Error for InvalidImagePathError {
 
 impl fmt::Display for InvalidImagePathError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -211,6 +215,69 @@ impl Error for ImageFormatError {
 }
 impl fmt::Display for ImageFormatError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
+    }
+}
+
+#[cfg(test)]
+mod test {
+    use crate::units::color::Color;
+    use crate::units::ScaleMode;
+    use crate::util::ImageUtil;
+    use image::imageops::FilterType;
+    use image::{DynamicImage, GenericImageView};
+
+    #[test]
+    fn fill_image() {
+        let mut image = DynamicImage::new_rgb8(32, 32);
+        let col = [255, 0, 0, 255];
+        ImageUtil::fill_image(&mut image, &col);
+
+        assert_eq!(image.get_pixel(0, 0).0, col);
+    }
+
+    #[test]
+    fn scale_image() {
+        let image = DynamicImage::new_rgb8(256, 256);
+        let scaled = ImageUtil::scale_image(
+            &image,
+            32,
+            32,
+            &ScaleMode::Keep,
+            &FilterType::CatmullRom,
+            &Color::new(255, 255, 255, 255),
+            false,
+        )
+        .unwrap();
+
+        assert_eq!(scaled.width(), 32);
+        assert_eq!(scaled.height(), 32);
+    }
+
+    #[test]
+    fn scale_image_inc() {
+        let image = DynamicImage::new_rgb8(256, 256);
+        let scaled = ImageUtil::scale_image(
+            &image,
+            32,
+            32,
+            &ScaleMode::Keep,
+            &FilterType::CatmullRom,
+            &Color::new(255, 255, 255, 255),
+            true,
+        )
+        .unwrap();
+
+        assert_eq!(scaled.width(), 32);
+        assert_eq!(scaled.height(), 32);
+    }
+
+    #[test]
+    fn scale_to_half() {
+        let image = DynamicImage::new_rgb8(64, 64);
+        let scaled = ImageUtil::scale_to_half(&image).unwrap();
+
+        assert_eq!(scaled.width(), 32);
+        assert_eq!(scaled.height(), 32);
     }
 }

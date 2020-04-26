@@ -1,5 +1,6 @@
 //! Measures and units
 
+mod border;
 pub mod color;
 pub mod format;
 mod length;
@@ -10,7 +11,10 @@ pub use length::Length;
 pub use length::LengthUnit;
 pub use length::ToLength;
 
+pub use size::FixSize;
 pub use size::Size;
 
 pub use scale::Scale;
 pub use scale::ScaleMode;
+
+pub use border::Borders;
