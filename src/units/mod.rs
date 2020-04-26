@@ -1,5 +1,6 @@
 //! Measures and units
 
+mod border;
 pub mod color;
 pub mod format;
 mod length;
@@ -14,3 +15,5 @@ pub use size::Size;
 
 pub use scale::Scale;
 pub use scale::ScaleMode;
+
+pub use border::Borders;

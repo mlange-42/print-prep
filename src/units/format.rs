@@ -71,7 +71,6 @@ fn create_formats() -> HashMap<&'static str, &'static str> {
 #[cfg(test)]
 mod test {
     use crate::units::format::to_print_format;
-    use crate::units::length::{Length, LengthUnit, ToLength};
     use crate::units::size::Size;
 
     #[test]
