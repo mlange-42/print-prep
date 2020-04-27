@@ -456,14 +456,6 @@ impl ImageIoOperation for PrepareImage {
                 color,
             );
         }
-        /*
-        let pad_color = Rgba([0, 0, 0, 255]);
-        imageproc::drawing::draw_hollow_rect_mut(
-            &mut result,
-            Rect::at(margins.left().value() as i32, margins.top().value() as i32)
-                .of_size(frame.width().value() as u32, frame.height().value() as u32),
-            pad_color,
-        );*/
 
         // ***************************************
         // ********* SCALE & COPY ORIGINAL *******
