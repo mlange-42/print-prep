@@ -7,7 +7,7 @@ Command line tool for preparing photos for printing, and other bulk image operat
 * **[Download binaries](https://github.com/mlange-42/print-prep/releases/)**
 * [Sources on GitHub](https://github.com/mlange-42/print-prep)
 
-_This project is in a very early stage!_
+_Warning: This project is in a very early stage! However, basic functionality is working._
 
 **Content**
 * [Features](#features)
@@ -20,7 +20,8 @@ _This project is in a very early stage!_
 
 ## Features
 
-* [TODO]
+* Bulk image processing
+* Prepare images for printing, with exact size, 'mat' framing, cut marks, test pattern, EXIF information, ...
 
 ## Installation
 
@@ -30,9 +31,12 @@ _This project is in a very early stage!_
 ## Getting started
 
 * See section [Examples](#examples) below, and try the batch files in sub-directory [/cmd_examples](https://github.com/mlange-42/print-prep/tree/master/cmd_examples). 
-* Run `pprep --help` to view the full list of options.
+* Run `pprep -h` to view the full list of options. Use `pprep --help` for a more comprehensive help message.
+* Run `pprep <subcommand> -h` or `pprep <subcommand> --help` for information on a particular command.
 
 ## Examples
+
+A simple example for preparing prints with 'mats' (padding) and cut marks:
 
 ```
 pprep ^
@@ -42,19 +46,159 @@ pprep ^
     --output "test_data/out/*-marks.png" ^
     --format 10cm/15cm ^
 	--padding 5mm ^
-	--margins 2mm ^
-	--cut-marks ./1mm
+	--margins 5mm ^
+	--cut-marks ./1mm ^
+    --dpi 90
 ```
+
+> _Note 1:_ The ^ at the end of each line is required for breaking commands into multiple lines (at least on Windows).
+
+> _Note 2:_ On Unix systems, the input pattern(s), as well as the output pattern with placeholder * **MUST be quoted**!.
+
+Resulting in output like this:
+
+![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)
+_Simple print preparation example_
+
+
 
 ## Commands
 
-### Scale
+Common options of all sub-commands are listed here.
+For options of specific subcommands, see:
 
-[TODO]
+**[`prep`](#prep) &nbsp; [`scale`](#scale) &nbsp; [`list`](#list)**
 
-### List
+Common options:
+```
+Command-line tool for photo print preparation and other bulk image operations.
 
-[TODO]
+Use `pprep -h`     for help, or
+    `pprep --help` for more detailed help, or
+    `pprep <subcommand> -h` for help on an operation.
+
+For more documentation, see the GitHub repository:
+     https://mlange-42.github.io/print-prep/
+
+USAGE:
+    pprep [FLAGS] [OPTIONS] <SUBCOMMAND>
+
+FLAGS:
+    -c, --cmd        Dummy option to end the `--input` list when no other top-level options are used.
+    -d, --debug      Debug print parsed command line options
+    -h, --help       Prints help information
+    -V, --version    Prints version information
+    -w, --wait       Wait for user input after processing
+
+OPTIONS:
+    -i, --input <input>...     List of input files or patterns. On Unix systems, patterns MUST be quoted!
+    -t, --threads <threads>    Number of threads for parallel processing. Optional, default: number of processors
+
+SUBCOMMANDS:
+    help     Prints this message or the help of the given subcommand(s)
+    list     List files found by input pattern
+    prep     Prepare images for printing (add cut marks, 'mats', test patterns, EXIF information, ...).
+    scale    Scale images to absolute or relative size
+```
+
+### `prep`
+
+```
+Prepare images for printing (add cut marks, 'mats', test patterns, EXIF information, ...).
+
+    ┏━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━┓
+    ┃   │                            │   ┃-----  format
+    ┠─── ---------------------------- ───┨
+    ┃   |                            |---┃-----  framed-size
+    ┃   |   ┏━━━━━━━━━━━━━━━━━━━━┓   |   ┃
+    ┃   |   ┃                    ┃---|---┃-----  image-size
+    ┃   |   ┃                    ┃   |   ┃       border
+    ┃   |   ┃                    ┃   |   ┃
+    ┃   |   ┃                    ┃  -|---┃-----  padding
+    ┃   |   ┃                    ┃   |   ┃
+    ┃   |   ┃                    ┃   |  -┃-----  margins
+    ┃   |   ┗━━━━━━━━━━━━━━━━━━━━┛   |   ┃
+    ┃   |                            |---┃-----  cut-frame
+    ┠─── ---------------------------- ───┨
+    ┃   │                            │---┃-----  cut-marks
+    ┗━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━┛
+
+USAGE:
+    pprep prep [FLAGS] [OPTIONS] --format <format> --output <output>
+
+FLAGS:
+    -h, --help           Prints help information
+        --incremental    Enable incremental scaling. For scaling to small sizes, scales down in multiple steps, to 50%
+                         per step, averaging over 2x2 pixels
+        --no-rotation    Prevents rotation of portrait format images (or of landscape format images if output is
+                         portrait)
+    -V, --version        Prints version information
+
+OPTIONS:
+    -b, --bg <bg>                        Background color. Default `white`
+        --border <border>                Border width. Default none
+        --border-color <border-color>    Border color. Default black
+        --cut-color <cut-color>          Cut marks or frame color. Default: black
+        --cut-frame <cut-frame>          Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`
+        --cut-marks <cut-marks>          Cut marks with offset. Format <line-width>/<offset>. Use alternative to
+                                         `--cut-frame`
+    -d, --dpi <dpi>                      Image resolution. Default `300`
+    -f, --filter <filter>                Filter type for image scaling. One of `(nearest|linear|cubic|gauss|lanczos)`.
+                                         Default: `cubic`
+        --format <format>                Print format `width/height`. Formats in cm are converted to exact print
+                                         formats in inches. Examples: `15cm/10cm`, `6in/4in`, `6000px/4000px`
+        --framed-size <framed-size>      Maximum image size, incl. padding
+        --image-size <image-size>        Maximum image size, excl. padding
+        --margins <margins>              Minimum margins
+    -o, --output <output>                Output path. Use `*` as placeholder for the original base file name.
+                                         Used to determine output image type. On Unix systems, this MUST be quoted!
+        --padding <padding>              Padding
+    -q, --quality <quality>              Image quality for JPEG output in percent. Optional, default `95`
+```
+
+### `scale`
+
+```
+Scale images to absolute or relative size
+
+USAGE:
+    pprep scale [FLAGS] [OPTIONS] --output <output>
+
+FLAGS:
+    -h, --help           Prints help information
+        --incremental    Enable incremental scaling. For scaling to small sizes, scales down in multiple steps, to 50%
+                         per step, averaging over 2x2 pixels
+    -V, --version        Prints version information
+
+OPTIONS:
+    -b, --bg <bg>              Background color for `--mode fill`. Default `white`
+    -d, --dpi <dpi>            Image resolution for size not in px. Default `300`
+    -f, --filter <filter>      Filter type for image scaling. One of `(nearest|linear|cubic|gauss|lanczos)`. Default:
+                               `cubic`
+    -m, --mode <mode>          Scaling mode. Must be given when using `--size` with width and height. One of
+                               `(keep|stretch|crop|fill)`. Default: `keep`
+    -o, --output <output>      Output path. Use `*` as placeholder for the original base file name.
+                               Used to determine output image type. On Unix systems, this MUST be quoted!
+    -q, --quality <quality>    Image quality for JPEG output in percent. Optional, default `95`
+        --scale <scale>        Output image scale. Use either `--size` or `--scale`. Examples: `0.5`, `50%`, `20%/10%`
+        --size <size>          Output image size. Use either `--size` or `--scale`. Examples: `100px/.`, `./15cm`,
+                               `8in/6in`
+```
+
+### `list`
+
+```
+List files found by input pattern
+
+USAGE:
+    pprep list [FLAGS]
+
+FLAGS:
+    -a, --absolute    Prints the absolute path
+    -h, --help        Prints help information
+    -p, --path        Prints the full path
+    -V, --version     Prints version information
+```
 
 ## Library / crate
 

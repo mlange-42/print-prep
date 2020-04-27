@@ -14,6 +14,7 @@ use std::path::PathBuf;
 use structopt::StructOpt;
 
 /// Prepare images for printing (add cut marks, 'mats', test patterns, EXIF information, ...).
+///
 /// <pre>
 ///     ┏━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━┓
 ///     ┃   │                            │   ┃-----  format
