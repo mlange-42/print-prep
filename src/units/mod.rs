@@ -12,6 +12,7 @@ pub use length::LengthUnit;
 pub use length::ToLength;
 
 pub use size::FixSize;
+pub use size::FreeSize;
 pub use size::Size;
 
 pub use scale::Scale;

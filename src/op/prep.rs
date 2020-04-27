@@ -3,7 +3,7 @@
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::Color;
-use crate::units::{format, LengthUnit, ScaleMode, Size};
+use crate::units::{format, FreeSize, LengthUnit, ScaleMode};
 use crate::units::{Borders, FixSize};
 use crate::util::ImageUtil;
 use image::imageops::FilterType;
@@ -37,11 +37,11 @@ pub struct PrepareImage {
 
     /// Cut marks with offset. Format <line-width>/<offset>. Use alternative to `--cut-frame`.
     #[structopt(name = "cut-marks", long)]
-    pub cut_marks: Option<Size>,
+    pub cut_marks: Option<FreeSize>,
 
     /// Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`.
     #[structopt(name = "cut-frame", long)]
-    pub cut_frame: Option<Size>,
+    pub cut_frame: Option<FreeSize>,
 
     /// Cut marks or frame color. Default: black.
     #[structopt(name = "cut-color", long)]
@@ -298,7 +298,7 @@ impl ImageIoOperation for PrepareImage {
         };
 
         // Calculates sizes, etc.
-        let (img, frame, padding, margins) =
+        let (img, _frame, padding, margins) =
             self.calc_sizes(width, height, image.width(), image.height(), rotate, dpi);
         let x_img = (margins.left().value() + padding.left().value()) as u32;
         let y_img = (margins.top().value() + padding.top().value()) as u32;
