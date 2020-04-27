@@ -1,8 +1,8 @@
 ..\pprep ^
-  --input ../test_data/*.png ^
-  --debug ^
+  --input "../test_data/*.png" ^
+  --cmd ^
   scale ^
-    --output ../test_data/out/*-scale-percent.png ^
+    --output "../test_data/out/*-scale-percent.png" ^
     --scale 25%%/50%% ^
 	--mode stretch
 pause

@@ -1,8 +1,8 @@
 ..\target\release\pprep ^
-  --input ../test_data/*.png ^
-  --debug ^
+  --input "../test_data/*.png" ^
+  --cmd ^
   scale ^
-    --output ../test_data/out/*-scale.png ^
+    --output "../test_data/out/*-scale.png" ^
     --size 2cm/5cm ^
 	--mode fill ^
 	--bg blue

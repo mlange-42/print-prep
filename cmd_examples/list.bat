@@ -1,5 +1,5 @@
 ..\pprep ^
-  --input ../* ^
+  --input "../*" ^
   --debug ^
   list ^
     --absolute

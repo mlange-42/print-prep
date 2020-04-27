@@ -7,7 +7,7 @@ use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-/// List files.
+/// List files found by input pattern.
 #[derive(StructOpt, Debug)]
 pub struct ListFiles {
     /// Prints the full path.

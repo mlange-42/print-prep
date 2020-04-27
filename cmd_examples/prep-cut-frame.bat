@@ -1,11 +1,11 @@
-..\target\release\pprep ^
+..\pprep ^
   --input "../test_data/*.png" ^
   --cmd ^
   prep ^
     --output "../test_data/out/*-frame.png" ^
-    --format 15cm/10cm ^
-    --framed-size 12cm/6cm ^
+    --format 10cm/15cm ^
 	--padding 5mm ^
-	--cut-frame ./. ^
+	--margins 2mm ^
+	--cut-frame ./2mm ^
 	--dpi 300
 pause

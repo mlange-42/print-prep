@@ -1,2 +1,2 @@
-..\pprep prep -h
+..\pprep prep --help
 pause
