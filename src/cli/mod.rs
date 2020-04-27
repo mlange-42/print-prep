@@ -2,7 +2,7 @@
 
 pub mod parse;
 
-use crate::op::{ImageOperation, ScaleImage};
+use crate::op::{ImageOperation, ListFiles, PrepareImage, ScaleImage};
 use std::error::Error;
 use std::fmt;
 use std::str::FromStr;
@@ -12,53 +12,70 @@ use structopt::StructOpt;
 ///
 /// Use `pprep -h`     for help, or
 ///     `pprep --help` for more detailed help, or
-///     `pprep <subcommand> -h` for help on an operation
+///     `pprep <subcommand> -h` for help on an operation.
 ///
-/// For more documentation and explanation of the algorithm, see the GitHub repository:
+/// For more documentation, see the GitHub repository:
 ///      https://mlange-42.github.io/print-prep/
 #[derive(StructOpt, Debug)]
 #[structopt(verbatim_doc_comment)]
 pub struct Cli {
-    /// List of input files or patterns
+    /// List of input files or patterns. On Unix systems, patterns MUST be quoted!
+    ///
+    /// Examples:
+    /// `--input "path/to/*.jpg"`
+    /// `--input "path/to/*.jpg" "other/path/to/*.jpg"`
+    /// `--input image-0001.jpg image-0002.jpg image-0003.jpg`
+    ///
+    #[structopt(verbatim_doc_comment)]
     #[structopt(short, long)]
     pub input: Vec<String>,
 
-    /// Output path. Use `*` as placeholder for the original file name.
+    /// Dummy option to end the `--input` list when no other top-level options are used.
+    ///
+    /// E.g., the following won't work:
+    /// `pprep --input image.jpg prep ...`
+    /// Instead, use this:
+    /// `pprep --input image.jpg --cmd prep ...`
+    #[structopt(verbatim_doc_comment)]
     #[structopt(short, long)]
-    pub output: String,
-
-    /// Image quality for JPEG output in percent. Optional, default `95`.
-    #[structopt(short, long)]
-    pub quality: Option<u8>,
+    pub cmd: bool,
 
     /// Number of threads for parallel processing. Optional, default: number of processors.
     #[structopt(short, long)]
     pub threads: Option<usize>,
 
-    /// Debug print parsed command line options
+    /// Debug print parsed command line options.
     #[structopt(short, long)]
     pub debug: bool,
 
-    /// Wait for user input after processing
+    /// Wait for user input after processing.
     #[structopt(short, long)]
     pub wait: bool,
 
-    /// Input selection
+    /// Input selection.
     #[structopt(subcommand)]
     pub op: Operation,
 }
 
-/// Operations
+/// Image operations
 #[allow(dead_code)]
 #[derive(StructOpt, Debug)]
 pub enum Operation {
+    // /// Scale images to absolute or relative size.
     Scale(ScaleImage),
+    // /// List files found by input pattern.
+    List(ListFiles),
+    // /// Prepare images for printing.
+    Prep(PrepareImage),
 }
 
 impl Operation {
+    /// Returns the associated ImageOperation.
     pub fn get_op(&self) -> &dyn ImageOperation {
         match self {
             Operation::Scale(sc) => sc,
+            Operation::List(ls) => ls,
+            Operation::Prep(pr) => pr,
         }
     }
 }

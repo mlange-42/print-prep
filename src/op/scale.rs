@@ -1,43 +1,68 @@
+//! Scale images.
+
 use crate::cli::parse;
-use crate::op::ImageOperation;
-use crate::units::color::RGBA;
-use crate::units::length::{Length, LengthUnit, Scale, ScaleMode, Size};
+use crate::op::{ImageIoOperation, ImageOperation};
+use crate::units::color::Color;
+use crate::units::{Length, LengthUnit, Scale, ScaleMode, Size};
+use crate::util::ImageUtil;
 use crate::OperationParametersError;
 use image::imageops::FilterType;
-use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
+use image::{DynamicImage, GenericImageView};
 use std::error::Error;
+use std::path::PathBuf;
 use structopt::StructOpt;
 
-/// Scale images.
+/// Scale images to absolute or relative size.
 #[derive(StructOpt, Debug)]
 pub struct ScaleImage {
-    /// Output image size.
+    /// Output path. Use `*` as placeholder for the original base file name.
+    /// Used to determine output image type. On Unix systems, this MUST be quoted!
+    ///
+    /// Examples:
+    /// --output "path/to/*-out.jpg"
+    ///
+    #[structopt(verbatim_doc_comment)]
+    #[structopt(short, long)]
+    pub output: String,
+
+    /// Image quality for JPEG output in percent. Optional, default `95`.
+    #[structopt(short, long)]
+    pub quality: Option<u8>,
+
+    /// Output image size. Use either `--size` or `--scale`.
     /// Examples: `100px/.`, `./15cm`, `8in/6in`.
-    /// Use either `--size` or `--scale`.
     #[structopt(long)]
-    size: Option<Size>,
-    /// Output image scale.
+    pub size: Option<Size>,
+
+    /// Output image scale. Use either `--size` or `--scale`.
     /// Examples: `0.5`, `50%`, `20%/10%`.
-    /// Use either `--size` or `--scale`.
     #[structopt(long)]
-    scale: Option<Scale>,
-    /// Scaling mode.
+    pub scale: Option<Scale>,
+
+    /// Scaling mode. Must be given when using `--size` with width and height.
     /// One of `(keep|stretch|crop|fill)`.
     /// Default: `keep`.
-    /// Must be given when using `--size` with width and height.
-    #[structopt(long)]
-    mode: Option<ScaleMode>,
+    #[structopt(short, long)]
+    pub mode: Option<ScaleMode>,
+
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
     /// Default: `cubic`.
-    #[structopt(long, parse(try_from_str = parse::parse_filter_type))]
-    filter: Option<FilterType>,
+    #[structopt(short, long, parse(try_from_str = parse::parse_filter_type))]
+    pub filter: Option<FilterType>,
+
+    /// Enable incremental scaling.
+    /// For scaling to small sizes, scales down in multiple steps, to 50% per step, averaging over 2x2 pixels.
+    #[structopt(long)]
+    pub incremental: bool,
+
     /// Image resolution for size not in px. Default `300`.
-    #[structopt(long)]
-    dpi: Option<f32>,
+    #[structopt(short, long)]
+    pub dpi: Option<f64>,
+
     /// Background color for `--mode fill`. Default `white`.
-    #[structopt(long)]
-    bg: Option<RGBA>,
+    #[structopt(short, long)]
+    pub bg: Option<Color>,
 }
 impl ScaleImage {
     fn check(&self) -> Result<(), Box<dyn Error>> {
@@ -51,10 +76,28 @@ impl ScaleImage {
 }
 
 impl ImageOperation for ScaleImage {
-    fn execute(&self, image: &DynamicImage) -> Result<DynamicImage, Box<dyn Error>> {
+    fn execute(&self, files: &[PathBuf]) -> Result<(), Box<dyn Error>> {
+        ImageIoOperation::execute(self, &files)
+    }
+}
+
+impl ImageIoOperation for ScaleImage {
+    fn output(&self) -> &str {
+        &self.output
+    }
+
+    fn quality(&self) -> &Option<u8> {
+        &self.quality
+    }
+
+    fn process_image(&self, image: &DynamicImage) -> Result<DynamicImage, Box<dyn Error>> {
         self.check()?;
 
         let dpi = self.dpi.unwrap_or(300.0);
+        let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
+        let mode = self.mode.as_ref().unwrap_or(&ScaleMode::Keep);
+        let color = self.bg.clone().unwrap_or(Color::new(255, 255, 255, 255));
+
         let size = if let Some(s) = &self.size {
             s.to(&LengthUnit::Px, dpi)
         } else {
@@ -67,9 +110,6 @@ impl ImageOperation for ScaleImage {
                 )),
             )?
         };
-        let filter = self.filter.as_ref().unwrap_or(&FilterType::CatmullRom);
-        let mode = self.mode.as_ref().unwrap_or(&ScaleMode::Keep);
-        let color = self.bg.clone().unwrap_or(RGBA::new(255, 255, 255, 255));
 
         let mut any_missing = false;
         let width = if let Some(w) = size.width() {
@@ -87,34 +127,10 @@ impl ImageOperation for ScaleImage {
             ((w as f64 / image.width() as f64) * image.height() as f64).round() as u32
         };
 
-        let result = if any_missing {
-            image.resize(width, height, *filter)
-        } else {
-            match mode {
-                ScaleMode::Keep => image.resize(width, height, *filter),
-                ScaleMode::Stretch => image.resize_exact(width, height, *filter),
-                ScaleMode::Crop => image.resize_to_fill(width, height, *filter),
-                ScaleMode::Fill => {
-                    let temp = image.resize(width, height, *filter);
-                    let mut result = if temp.color().has_alpha() {
-                        DynamicImage::new_rgba8(width, height)
-                    } else {
-                        DynamicImage::new_rgb8(width, height)
-                    };
-                    let col = Rgba(*color.channels());
-                    for y in 0..result.height() {
-                        for x in 0..result.width() {
-                            result.put_pixel(x, y, col);
-                        }
-                    }
-                    let x = (result.width() - temp.width()) / 2;
-                    let y = (result.height() - temp.height()) / 2;
-                    result.copy_from(&temp, x, y)?;
-                    result
-                }
-            }
-        };
+        let mode = if any_missing { &ScaleMode::Keep } else { mode };
+        let result =
+            ImageUtil::scale_image(image, width, height, mode, filter, &color, self.incremental);
 
-        Ok(result)
+        result
     }
 }

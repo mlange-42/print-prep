@@ -1,6 +1,9 @@
+//! String parsing for command line options from external crates.
 use crate::ParseEnumError;
 use image::imageops::FilterType;
 
+/// Parse a string to a FilterType.
+/// Accepts `nearest|linear|cubic|gauss|lanczos`
 pub fn parse_filter_type(str: &str) -> Result<FilterType, ParseEnumError> {
     match str {
         "nearest" => Ok(FilterType::Nearest),

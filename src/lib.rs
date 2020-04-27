@@ -1,3 +1,7 @@
+//! Command line tool and library for preparing photos for printing, and other bulk image operations.
+
+#![doc(issue_tracker_base_url = "https://github.com/mlange-42/print-prep/issues/")]
+
 pub mod cli;
 pub mod op;
 pub mod units;
@@ -10,6 +14,10 @@ use std::error::Error;
 use std::fmt;
 use std::process::exit;
 
+/// Trait to print a message and exit the program.
+/// Implemented for `Result` and `Option`.
+///
+/// Use like `expect(...)`.
 pub trait ErrorAbort<T> {
     fn exit(self, message: &str) -> T;
 }
@@ -36,7 +44,7 @@ where
             Ok(v) => v,
             Err(e) => {
                 eprintln!("Terminated with ERROR:");
-                eprintln!("{} ({:?})", message, e);
+                eprintln!("{} ({})", message, e);
                 exit(1);
             }
         }
@@ -55,7 +63,7 @@ impl Error for ParseEnumError {
 }
 impl fmt::Display for ParseEnumError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
 
@@ -71,11 +79,11 @@ impl Error for ParseStructError {
 }
 impl fmt::Display for ParseStructError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
 
-/// Error type for failed parsing of `String`s to `struct`s.
+/// Error type for illegal image operation parameters.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct OperationParametersError(String);
 
@@ -87,6 +95,6 @@ impl Error for OperationParametersError {
 }
 impl fmt::Display for OperationParametersError {
     fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
-        self.0.fmt(f)
+        write!(f, "{}", self.0)
     }
 }
