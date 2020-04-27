@@ -216,8 +216,9 @@ impl PrepareImage {
 
         (image, framed, padding, margins)
     }
-    #[allow(dead_code)]
-    fn rotate_size(size: FixSize, rotate: bool) -> FixSize {
+
+    fn rotate_size(size: FixSize, _rotate: bool) -> FixSize {
+        // TODO: Can probably be removed
         /*if rotate {
             size.rotate_90()
         } else {
@@ -225,8 +226,9 @@ impl PrepareImage {
         }*/
         size
     }
-    #[allow(dead_code)]
-    fn rotate_borders(borders: Borders, rotate: bool) -> Borders {
+
+    fn rotate_borders(borders: Borders, _rotate: bool) -> Borders {
+        // TODO: Can probably be removed
         /*if rotate {
             borders.rotate_90()
         } else {
