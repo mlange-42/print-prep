@@ -121,6 +121,7 @@ impl PrepareImage {
         Ok(())
     }
 
+    /// Returns calculated (image, framed, padding, margins).
     fn calc_sizes(
         &self,
         width: u32,
@@ -130,6 +131,7 @@ impl PrepareImage {
         rotate: bool,
         dpi: f64,
     ) -> (FixSize, FixSize, Borders, Borders) {
+        // Calculate maximum size of image + padding
         let framed = if let Some(framed) = &self.framed_size {
             Self::rotate_size(framed.to_px(dpi), rotate)
         } else {
@@ -152,6 +154,8 @@ impl PrepareImage {
                 )
             }
         };
+
+        // Calculate maximum size of image (without padding)
         let image = if let Some(image) = &self.framed_size {
             Self::rotate_size(image.to_px(dpi), rotate)
         } else {
@@ -165,6 +169,7 @@ impl PrepareImage {
                     - pad.bottom().value() as i32,
             )
         };
+        // Calculate padding
         let padding = if let Some(pad) = &self.padding {
             Self::rotate_borders(pad.to_px(dpi), rotate)
         } else {
@@ -191,11 +196,17 @@ impl PrepareImage {
                 )
             }
         };
+
+        // Calculate actual size of image
         let image = FixSize::px(scaled_width, scaled_height);
+
+        // Calculate actual size of image + padding
         let framed = FixSize::px(
             scaled_width + padding.left().value() as i32 + padding.right().value() as i32,
             scaled_height + padding.top().value() as i32 + padding.bottom().value() as i32,
         );
+
+        // Calculate actual margine
         let margins = if let Some(mar_orig) = &self.margins {
             let mar = Self::rotate_borders(mar_orig.to_px(dpi), rotate);
             let diff_hor = (mar.right().value() as i32 - mar.left().value() as i32) / 2;
