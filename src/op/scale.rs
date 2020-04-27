@@ -16,7 +16,7 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 pub struct ScaleImage {
     /// Output path. Use `*` as placeholder for the original base file name.
-    /// Used to determine output image type.
+    /// Used to determine output image type. On Unix systems, this MUST be quoted!
     ///
     /// Examples:
     /// --output "path/to/*-out.jpg"

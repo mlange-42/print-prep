@@ -19,7 +19,7 @@ use structopt::StructOpt;
 #[derive(StructOpt, Debug)]
 #[structopt(verbatim_doc_comment)]
 pub struct Cli {
-    /// List of input files or patterns. On Unix systems, patterns must be quoted!
+    /// List of input files or patterns. On Unix systems, patterns MUST be quoted!
     ///
     /// Examples:
     /// `--input "path/to/*.jpg"`

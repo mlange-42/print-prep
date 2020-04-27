@@ -1,4 +1,4 @@
-..\target\release\pprep ^
+..\pprep ^
   --input "../test_data/*.png" ^
   --cmd ^
   scale ^

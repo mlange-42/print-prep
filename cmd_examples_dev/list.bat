@@ -1,5 +1,5 @@
 ..\target\release\pprep ^
-  --input ../* ^
+  --input "../*" ^
   --debug ^
   list ^
     --absolute
