@@ -52,6 +52,10 @@ impl Borders {
         &self.left
     }
 
+    /// Converts these borders to pixels.
+    pub fn to_px(&self, dpi: f64) -> Borders {
+        self.to(&LengthUnit::Px, dpi)
+    }
     /// Converts these borders to another unit.
     pub fn to(&self, unit: &LengthUnit, dpi: f64) -> Borders {
         Borders {
@@ -68,6 +72,15 @@ impl Borders {
             self.top.clone(),
             self.right.clone(),
             self.bottom.clone(),
+        )
+    }
+    /// Rotates these borders by 27° clockwise.
+    pub fn rotate_270(&self) -> Borders {
+        Borders::each(
+            self.right.clone(),
+            self.bottom.clone(),
+            self.left.clone(),
+            self.top.clone(),
         )
     }
     /// Do these borders require a dpi value for conversion to px?

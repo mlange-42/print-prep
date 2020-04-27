@@ -46,6 +46,10 @@ impl Size {
     pub fn height(&self) -> &Option<Length> {
         &self.height
     }
+    /// Converts this size to pixels.
+    pub fn to_px(&self, dpi: f64) -> Size {
+        self.to(&LengthUnit::Px, dpi)
+    }
     /// Converts this size to another unit.
     pub fn to(&self, unit: &LengthUnit, dpi: f64) -> Size {
         Size {
@@ -142,6 +146,10 @@ impl FixSize {
     pub fn height(&self) -> &Length {
         &self.height
     }
+    /// Converts this size to pixels.
+    pub fn to_px(&self, dpi: f64) -> FixSize {
+        self.to(&LengthUnit::Px, dpi)
+    }
     /// Converts this size to another unit.
     pub fn to(&self, unit: &LengthUnit, dpi: f64) -> FixSize {
         FixSize {
@@ -151,6 +159,10 @@ impl FixSize {
     }
     /// Rotates this size by 90° clockwise (i.e. swaps width and height).
     pub fn rotate_90(&self) -> FixSize {
+        FixSize::new(self.height.clone(), self.width.clone())
+    }
+    /// Rotates this size by 270° clockwise (i.e. swaps width and height).
+    pub fn rotate_270(&self) -> FixSize {
         FixSize::new(self.height.clone(), self.width.clone())
     }
     /// Does this size require a dpi value for conversion to px?

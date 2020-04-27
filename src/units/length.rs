@@ -59,6 +59,10 @@ impl Length {
             unit: LengthUnit::Px,
         }
     }
+    /// Converts this length to pixels.
+    pub fn to_px(&self, dpi: f64) -> Length {
+        self.to(&LengthUnit::Px, dpi)
+    }
     /// Converts this length to another unit.
     pub fn to(&self, unit: &LengthUnit, dpi: f64) -> Length {
         if &self.unit == unit {

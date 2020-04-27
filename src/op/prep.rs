@@ -65,6 +65,14 @@ pub struct PrepareImage {
     #[structopt(long)]
     pub margins: Option<Borders>,
 
+    /// Border width. Default none.
+    #[structopt(long)]
+    pub border: Option<Borders>,
+
+    /// Border color. Default black.
+    #[structopt(name = "border-color", long)]
+    pub border_color: Option<Color>,
+
     /// Enable incremental scaling.
     /// For scaling to small sizes, scales down in multiple steps, to 50% per step, averaging over 2x2 pixels.
     #[structopt(long)]
@@ -123,23 +131,17 @@ impl PrepareImage {
         dpi: f64,
     ) -> (FixSize, FixSize, Borders, Borders) {
         let framed = if let Some(framed) = &self.framed_size {
-            Self::rotate_size(framed.to(&LengthUnit::Px, dpi), rotate)
+            Self::rotate_size(framed.to_px(dpi), rotate)
         } else {
             if let Some(margins) = &self.margins {
-                let mar = Self::rotate_borders(margins.to(&LengthUnit::Px, dpi), rotate);
+                let mar = Self::rotate_borders(margins.to_px(dpi), rotate);
                 FixSize::px(
                     width as i32 - mar.right().value() as i32 - mar.left().value() as i32,
                     height as i32 - mar.top().value() as i32 - mar.bottom().value() as i32,
                 )
             } else {
-                let img = Self::rotate_size(
-                    self.image_size.as_ref().unwrap().to(&LengthUnit::Px, dpi),
-                    rotate,
-                );
-                let pad = Self::rotate_borders(
-                    self.padding.as_ref().unwrap().to(&LengthUnit::Px, dpi),
-                    rotate,
-                );
+                let img = Self::rotate_size(self.image_size.as_ref().unwrap().to_px(dpi), rotate);
+                let pad = Self::rotate_borders(self.padding.as_ref().unwrap().to_px(dpi), rotate);
                 FixSize::px(
                     img.width().value() as i32
                         + pad.right().value() as i32
@@ -151,12 +153,9 @@ impl PrepareImage {
             }
         };
         let image = if let Some(image) = &self.framed_size {
-            Self::rotate_size(image.to(&LengthUnit::Px, dpi), rotate)
+            Self::rotate_size(image.to_px(dpi), rotate)
         } else {
-            let pad = Self::rotate_borders(
-                self.padding.as_ref().unwrap().to(&LengthUnit::Px, dpi),
-                rotate,
-            );
+            let pad = Self::rotate_borders(self.padding.as_ref().unwrap().to_px(dpi), rotate);
             FixSize::px(
                 framed.width().value() as i32
                     - pad.right().value() as i32
@@ -167,7 +166,7 @@ impl PrepareImage {
             )
         };
         let padding = if let Some(pad) = &self.padding {
-            Self::rotate_borders(pad.to(&LengthUnit::Px, dpi), rotate)
+            Self::rotate_borders(pad.to_px(dpi), rotate)
         } else {
             let hor = (framed.width().value() as i32 - image.width().value() as i32) / 2;
             let ver = (framed.height().value() as i32 - image.height().value() as i32) / 2;
@@ -198,9 +197,9 @@ impl PrepareImage {
             scaled_height + padding.top().value() as i32 + padding.bottom().value() as i32,
         );
         let margins = if let Some(mar_orig) = &self.margins {
-            let mar = Self::rotate_borders(mar_orig.to(&LengthUnit::Px, dpi), rotate);
-            let mut diff_hor = (mar.right().value() as i32 - mar.left().value() as i32) / 2;
-            let mut diff_ver = (mar.top().value() as i32 - mar.bottom().value() as i32) / 2;
+            let mar = Self::rotate_borders(mar_orig.to_px(dpi), rotate);
+            let diff_hor = (mar.right().value() as i32 - mar.left().value() as i32) / 2;
+            let diff_ver = (mar.top().value() as i32 - mar.bottom().value() as i32) / 2;
             let hor = (width as i32 - framed.width().value() as i32) / 2;
             let ver = (height as i32 - framed.height().value() as i32) / 2;
             Borders::px(
@@ -217,19 +216,25 @@ impl PrepareImage {
 
         (image, framed, padding, margins)
     }
-    fn rotate_size(size: FixSize, rotate: bool) -> FixSize {
-        if rotate {
+
+    fn rotate_size(size: FixSize, _rotate: bool) -> FixSize {
+        // TODO: Can probably be removed
+        /*if rotate {
             size.rotate_90()
         } else {
             size
-        }
+        }*/
+        size
     }
-    fn rotate_borders(borders: Borders, rotate: bool) -> Borders {
-        if rotate {
+
+    fn rotate_borders(borders: Borders, _rotate: bool) -> Borders {
+        // TODO: Can probably be removed
+        /*if rotate {
             borders.rotate_90()
         } else {
             borders
-        }
+        }*/
+        borders
     }
 }
 
@@ -269,9 +274,13 @@ impl ImageIoOperation for PrepareImage {
             (width, height)
         };
 
+        // Calculates sizes, etc.
         let (img, frame, padding, margins) =
             self.calc_sizes(width, height, image.width(), image.height(), rotate, dpi);
+        let x_img = (margins.left().value() + padding.left().value()) as u32;
+        let y_img = (margins.top().value() + padding.top().value()) as u32;
 
+        // Create empty image
         let mut result = if image.color().has_alpha() {
             DynamicImage::new_rgba8(width, height)
         } else {
@@ -279,19 +288,35 @@ impl ImageIoOperation for PrepareImage {
         };
         ImageUtil::fill_image(&mut result, color.channels());
 
-        let scaled = ImageUtil::scale_image(
-            image,
-            img.width().value() as u32,
-            img.height().value() as u32,
-            &ScaleMode::Fill,
-            filter,
-            &color,
-            self.incremental,
-        )?;
+        // ***************************************
+        // ************* DRAWING *****************
+        // ***************************************
 
-        let x = (margins.left().value() + padding.left().value()) as u32;
-        let y = (margins.top().value() + padding.top().value()) as u32;
-        result.copy_from(&scaled, x, y)?;
+        // Borders
+        if let Some(b) = &self.border {
+            let bor = Self::rotate_borders(b.to_px(dpi), rotate);
+            let color = Rgba(
+                self.border_color
+                    .as_ref()
+                    .map_or([0_u8, 0, 0, 255], |c| *c.channels()),
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(
+                    x_img as i32 - bor.left().value() as i32,
+                    y_img as i32 - bor.top().value() as i32,
+                )
+                .of_size(
+                    img.width().value() as u32
+                        + bor.left().value() as u32
+                        + bor.right().value() as u32,
+                    img.height().value() as u32
+                        + bor.top().value() as u32
+                        + bor.bottom().value() as u32,
+                ),
+                color,
+            );
+        }
 
         let pad_color = Rgba([0, 0, 0, 255]);
         imageproc::drawing::draw_hollow_rect_mut(
@@ -300,6 +325,21 @@ impl ImageIoOperation for PrepareImage {
                 .of_size(frame.width().value() as u32, frame.height().value() as u32),
             pad_color,
         );
+
+        // ***************************************
+        // ********* SCALE & COPY ORIGINAL *******
+        // ***************************************
+        let scaled = ImageUtil::scale_image(
+            image,
+            img.width().value() as u32,
+            img.height().value() as u32,
+            &ScaleMode::Stretch,
+            filter,
+            &color,
+            self.incremental,
+        )?;
+
+        result.copy_from(&scaled, x_img, y_img)?;
 
         Ok(result)
     }
