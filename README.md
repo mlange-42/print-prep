@@ -45,9 +45,9 @@ pprep ^
   prep ^
     --output "test_data/out/*-marks.png" ^
     --format 10cm/15cm ^
-	--padding 5mm ^
-	--margins 5mm ^
-	--cut-marks ./1mm ^
+    --padding 5mm ^
+    --margins 5mm ^
+    --cut-marks ./1mm ^
     --dpi 90
 ```
 
@@ -106,23 +106,24 @@ SUBCOMMANDS:
 ```
 Prepare images for printing (add cut marks, 'mats', test patterns, EXIF information, ...).
 
-    ┏━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━┓
-    ┃   │                            │   ┃-----  format
-    ┠─── ---------------------------- ───┨
-    ┃   |                            |---┃-----  framed-size
-    ┃   |   ┏━━━━━━━━━━━━━━━━━━━━┓   |   ┃
-    ┃   |   ┃                    ┃---|---┃-----  image-size
-    ┃   |   ┃                    ┃   |   ┃       border
-    ┃   |   ┃                    ┃   |   ┃
-    ┃   |   ┃                    ┃  -|---┃-----  padding
-    ┃   |   ┃                    ┃   |   ┃
-    ┃   |   ┃                    ┃   |  -┃-----  margins
-    ┃   |   ┗━━━━━━━━━━━━━━━━━━━━┛   |   ┃
-    ┃   |                            |---┃-----  cut-frame
-    ┠─── ---------------------------- ───┨
-    ┃   │                            │---┃-----  cut-marks
-    ┗━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━┛
-
+     ____________________________________
+    |   |                            |   |
+    |   |                            |   |-----  format
+    |--- ---------------------------- ---|
+    |   |    ____________________    |---|-----  framed-size
+    |   |   |                    |   |   |
+    |   |   |                    |---|---|-----  image-size
+    |   |   |                    |   |   |       border
+    |   |   |                    |   |   |
+    |   |   |                    |  -|---|-----  padding
+    |   |   |                    |   |   |
+    |   |   |                    |   |  -|-----  margins
+    |   |   |____________________|   |   |
+    |   |                            |---|-----  cut-frame
+    |--- ---------------------------- ---|
+    |   |                            |---|-----  cut-marks
+    |___|____________________________|___|
+	
 USAGE:
     pprep prep [FLAGS] [OPTIONS] --format <format> --output <output>
 
@@ -204,7 +205,7 @@ FLAGS:
 
 To use this crate as a rust library, add the following to your `Cargo.toml` dependencies section:
 ```
-ppa = { git = "https://github.com/mlange-42/print-prep.git" }
+print-prep = { git = "https://github.com/mlange-42/print-prep.git" }
 ```
 
 _Warning:_ The API is still incomplete and highly unstable, so be prepared for frequent changes. 
