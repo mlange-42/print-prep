@@ -15,7 +15,7 @@ branches:
   only:
     - master
     - dev
-    - "/\\d+\\.\\d+\\.\\d+/"
+    - "/^\\d+\\.\\d+\\.\\d+/"
 
 script:
   - cargo build --release
