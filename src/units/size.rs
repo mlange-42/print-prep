@@ -123,6 +123,94 @@ impl fmt::Display for Size {
 }
 
 #[derive(Debug, PartialEq, Clone)]
+pub struct FreeSize {
+    width: Option<Length>,
+    height: Option<Length>,
+}
+
+impl FreeSize {
+    pub fn new(width: Option<Length>, height: Option<Length>) -> Result<Self, ParseStructError> {
+        Ok(FreeSize { width, height })
+    }
+    /// Width of this size.
+    pub fn width(&self) -> &Option<Length> {
+        &self.width
+    }
+    /// Height of this size.
+    pub fn height(&self) -> &Option<Length> {
+        &self.height
+    }
+    /// Converts this size to pixels.
+    pub fn to_px(&self, dpi: f64) -> Size {
+        self.to(&LengthUnit::Px, dpi)
+    }
+    /// Converts this size to another unit.
+    pub fn to(&self, unit: &LengthUnit, dpi: f64) -> Size {
+        Size {
+            width: self.width.as_ref().and_then(|w| Some(w.to(unit, dpi))),
+            height: self.height.as_ref().and_then(|w| Some(w.to(unit, dpi))),
+        }
+    }
+    /// Rotates this size by 90° clockwise (i.e. swaps width and height).
+    pub fn rotate_90(&self) -> Size {
+        Size::new(self.height.clone(), self.width.clone()).unwrap()
+    }
+    /// Does this size require a dpi value for conversion to px?
+    pub fn needs_dpi(&self) -> bool {
+        let mut needs = false;
+        if let Some(w) = &self.width {
+            if w.needs_dpi() {
+                needs = true;
+            }
+        };
+        if let Some(h) = &self.height {
+            if h.needs_dpi() {
+                needs = true;
+            }
+        };
+        needs
+    }
+}
+
+impl FromStr for FreeSize {
+    type Err = Box<dyn Error>;
+
+    fn from_str(s: &str) -> Result<Self, Self::Err> {
+        let parts: Vec<_> = s.split("/").collect();
+        if parts.len() != 2 {
+            return Err(Box::new(ParseStructError(format!(
+                "Unexpected size format in {}, expects `width/height`",
+                s
+            ))));
+        }
+        let width = if parts[0] == "." {
+            None
+        } else {
+            Some(parts[0].parse()?)
+        };
+        let height = if parts[1] == "." {
+            None
+        } else {
+            Some(parts[1].parse()?)
+        };
+        Ok(FreeSize { width, height })
+    }
+}
+impl fmt::Display for FreeSize {
+    fn fmt(&self, f: &mut fmt::Formatter<'_>) -> fmt::Result {
+        let str1 = self
+            .width
+            .as_ref()
+            .map_or(".".to_string(), |l| l.to_string());
+        let str2 = self
+            .height
+            .as_ref()
+            .map_or(".".to_string(), |l| l.to_string());
+        write!(f, "{}/{}", str1, str2)
+    }
+}
+
+#[derive(Debug, PartialEq, Clone)]
 pub struct FixSize {
     width: Length,
     height: Length,
