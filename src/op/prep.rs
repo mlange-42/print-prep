@@ -408,6 +408,54 @@ impl ImageIoOperation for PrepareImage {
             );
         }
 
+        // Cut frame
+        if let Some(f) = &self.cut_frame {
+            let frame = f.to_px(dpi);
+            let color = Rgba(
+                self.cut_color
+                    .as_ref()
+                    .map_or([0_u8, 0, 0, 255], |c| *c.channels()),
+            );
+            let lw = frame.width().as_ref().map_or(1, |l| l.value() as i32);
+            let lw2 = lw / 2;
+            let offset = frame.height().as_ref().map_or(0, |l| l.value() as i32);
+            let xmin = x_img as i32 - padding.left().value() as i32;
+            let xmax = x_img as i32 + img_width as i32 + padding.right().value() as i32;
+            let ymin = y_img as i32 - padding.top().value() as i32;
+            let ymax = y_img as i32 + img_height as i32 + padding.bottom().value() as i32;
+
+            // Top
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - offset, ymin - lw2)
+                    .of_size(((xmax - xmin) + 2 * offset) as u32, lw as u32),
+                color,
+            );
+
+            // Bottom
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - offset, ymax - lw2)
+                    .of_size(((xmax - xmin) + 2 * offset) as u32, lw as u32),
+                color,
+            );
+
+            // Left
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - lw2, ymin - offset)
+                    .of_size(lw as u32, ((ymax - ymin) + 2 * offset) as u32),
+                color,
+            );
+
+            // Right
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmax - lw2, ymin - offset)
+                    .of_size(lw as u32, ((ymax - ymin) + 2 * offset) as u32),
+                color,
+            );
+        }
         /*
         let pad_color = Rgba([0, 0, 0, 255]);
         imageproc::drawing::draw_hollow_rect_mut(
