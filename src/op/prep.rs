@@ -3,7 +3,7 @@
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::Color;
-use crate::units::{format, LengthUnit, ScaleMode};
+use crate::units::{format, LengthUnit, ScaleMode, Size};
 use crate::units::{Borders, FixSize};
 use crate::util::ImageUtil;
 use image::imageops::FilterType;
@@ -34,6 +34,18 @@ pub struct PrepareImage {
     /// Image resolution. Default `300`.
     #[structopt(short, long)]
     pub dpi: Option<f64>,
+
+    /// Cut marks with offset. Format <line-width>/<offset>. Use alternative to `--cut-frame`.
+    #[structopt(name = "cut-marks", long)]
+    pub cut_marks: Option<Size>,
+
+    /// Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`.
+    #[structopt(name = "cut-frame", long)]
+    pub cut_frame: Option<Size>,
+
+    /// Cut marks or frame color. Default: black.
+    #[structopt(name = "cut-color", long)]
+    pub cut_color: Option<Color>,
 
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
@@ -121,6 +133,7 @@ impl PrepareImage {
         Ok(())
     }
 
+    /// Returns calculated (image, framed, padding, margins).
     fn calc_sizes(
         &self,
         width: u32,
@@ -130,6 +143,7 @@ impl PrepareImage {
         rotate: bool,
         dpi: f64,
     ) -> (FixSize, FixSize, Borders, Borders) {
+        // Calculate maximum size of image + padding
         let framed = if let Some(framed) = &self.framed_size {
             Self::rotate_size(framed.to_px(dpi), rotate)
         } else {
@@ -152,6 +166,8 @@ impl PrepareImage {
                 )
             }
         };
+
+        // Calculate maximum size of image (without padding)
         let image = if let Some(image) = &self.framed_size {
             Self::rotate_size(image.to_px(dpi), rotate)
         } else {
@@ -165,6 +181,7 @@ impl PrepareImage {
                     - pad.bottom().value() as i32,
             )
         };
+        // Calculate padding
         let padding = if let Some(pad) = &self.padding {
             Self::rotate_borders(pad.to_px(dpi), rotate)
         } else {
@@ -191,11 +208,17 @@ impl PrepareImage {
                 )
             }
         };
+
+        // Calculate actual size of image
         let image = FixSize::px(scaled_width, scaled_height);
+
+        // Calculate actual size of image + padding
         let framed = FixSize::px(
             scaled_width + padding.left().value() as i32 + padding.right().value() as i32,
             scaled_height + padding.top().value() as i32 + padding.bottom().value() as i32,
         );
+
+        // Calculate actual margine
         let margins = if let Some(mar_orig) = &self.margins {
             let mar = Self::rotate_borders(mar_orig.to_px(dpi), rotate);
             let diff_hor = (mar.right().value() as i32 - mar.left().value() as i32) / 2;
@@ -279,6 +302,8 @@ impl ImageIoOperation for PrepareImage {
             self.calc_sizes(width, height, image.width(), image.height(), rotate, dpi);
         let x_img = (margins.left().value() + padding.left().value()) as u32;
         let y_img = (margins.top().value() + padding.top().value()) as u32;
+        let img_width = img.width().value() as u32;
+        let img_height = img.height().value() as u32;
 
         // Create empty image
         let mut result = if image.color().has_alpha() {
@@ -307,24 +332,130 @@ impl ImageIoOperation for PrepareImage {
                     y_img as i32 - bor.top().value() as i32,
                 )
                 .of_size(
-                    img.width().value() as u32
-                        + bor.left().value() as u32
-                        + bor.right().value() as u32,
-                    img.height().value() as u32
-                        + bor.top().value() as u32
-                        + bor.bottom().value() as u32,
+                    img_width + bor.left().value() as u32 + bor.right().value() as u32,
+                    img_height + bor.top().value() as u32 + bor.bottom().value() as u32,
                 ),
                 color,
             );
         }
 
-        let pad_color = Rgba([0, 0, 0, 255]);
-        imageproc::drawing::draw_hollow_rect_mut(
-            &mut result,
-            Rect::at(margins.left().value() as i32, margins.top().value() as i32)
-                .of_size(frame.width().value() as u32, frame.height().value() as u32),
-            pad_color,
-        );
+        // Cut marks
+        if let Some(m) = &self.cut_marks {
+            let marks = m.to_px(dpi);
+            let color = Rgba(
+                self.cut_color
+                    .as_ref()
+                    .map_or([0_u8, 0, 0, 255], |c| *c.channels()),
+            );
+            let lw = marks.width().as_ref().map_or(1, |l| l.value() as i32);
+            let lw2 = lw / 2;
+            let offset = marks.height().as_ref().map_or(0, |l| l.value() as i32);
+            let xmin = x_img as i32 - padding.left().value() as i32;
+            let xmax = x_img as i32 + img_width as i32 + padding.right().value() as i32;
+            let ymin = y_img as i32 - padding.top().value() as i32;
+            let ymax = y_img as i32 + img_height as i32 + padding.bottom().value() as i32;
+
+            // Top left
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(0, ymin - lw2).of_size((xmin - offset) as u32, lw as u32),
+                color,
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - lw2, 0).of_size(lw as u32, (ymin - offset) as u32),
+                color,
+            );
+
+            // Top right
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmax + offset, ymin - lw2)
+                    .of_size((width as i32 - xmax - offset) as u32, lw as u32),
+                color,
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmax - lw2, 0).of_size(lw as u32, (ymin - offset) as u32),
+                color,
+            );
+
+            // Bottom left
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(0, ymax - lw2).of_size((xmin - offset) as u32, lw as u32),
+                color,
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - lw2, ymax + offset)
+                    .of_size(lw as u32, (height as i32 - ymax - offset) as u32),
+                color,
+            );
+
+            // Bottom right
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmax + offset, ymax - lw2)
+                    .of_size((width as i32 - xmax - offset) as u32, lw as u32),
+                color,
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmax - lw2, ymax + offset)
+                    .of_size(lw as u32, (height as i32 - ymax - offset) as u32),
+                color,
+            );
+        }
+
+        // Cut frame
+        if let Some(f) = &self.cut_frame {
+            let frame = f.to_px(dpi);
+            let color = Rgba(
+                self.cut_color
+                    .as_ref()
+                    .map_or([0_u8, 0, 0, 255], |c| *c.channels()),
+            );
+            let lw = frame.width().as_ref().map_or(1, |l| l.value() as i32);
+            let lw2 = lw / 2;
+            let offset = frame.height().as_ref().map_or(0, |l| l.value() as i32);
+            let xmin = x_img as i32 - padding.left().value() as i32;
+            let xmax = x_img as i32 + img_width as i32 + padding.right().value() as i32;
+            let ymin = y_img as i32 - padding.top().value() as i32;
+            let ymax = y_img as i32 + img_height as i32 + padding.bottom().value() as i32;
+
+            // Top
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - offset, ymin - lw2)
+                    .of_size(((xmax - xmin) + 2 * offset) as u32, lw as u32),
+                color,
+            );
+
+            // Bottom
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - offset, ymax - lw2)
+                    .of_size(((xmax - xmin) + 2 * offset) as u32, lw as u32),
+                color,
+            );
+
+            // Left
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmin - lw2, ymin - offset)
+                    .of_size(lw as u32, ((ymax - ymin) + 2 * offset) as u32),
+                color,
+            );
+
+            // Right
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut result,
+                Rect::at(xmax - lw2, ymin - offset)
+                    .of_size(lw as u32, ((ymax - ymin) + 2 * offset) as u32),
+                color,
+            );
+        }
 
         // ***************************************
         // ********* SCALE & COPY ORIGINAL *******

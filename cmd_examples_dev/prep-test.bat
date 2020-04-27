@@ -8,5 +8,7 @@
 	--margins 5mm ^
 	--border 2px/2px/5px/2px ^
 	--border-color red ^
+	--cut-marks ./3mm ^
+	--cut-frame ./1mm ^
 	--dpi 300
 pause
