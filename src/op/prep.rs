@@ -240,14 +240,12 @@ impl PrepareImage {
         (image, framed, padding, margins)
     }
 
-    fn rotate_size(size: FixSize, _rotate: bool) -> FixSize {
-        // TODO: Can probably be removed
-        /*if rotate {
+    fn rotate_size(size: FixSize, rotate: bool) -> FixSize {
+        if rotate {
             size.rotate_90()
         } else {
             size
-        }*/
-        size
+        }
     }
 
     fn rotate_borders(borders: Borders, _rotate: bool) -> Borders {
