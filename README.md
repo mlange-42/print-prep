@@ -57,7 +57,7 @@ pprep ^
 
 Resulting in output like this:
 
-![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)
+![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)  
 _Simple print preparation example_
 
 
