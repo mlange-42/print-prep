@@ -1,2 +1,2 @@
-..\target\release\pprep prep -h
+..\target\release\pprep prep --help
 pause

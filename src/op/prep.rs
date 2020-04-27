@@ -13,7 +13,26 @@ use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-/// Prepare images for printing.
+/// Prepare images for printing (add cut marks, 'mats', test patterns, EXIF information, ...).
+///
+///     ┏━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━┓
+///     ┃   │                            │   ┃-----  format
+///     ┠─── ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ───┨
+///     ┃   ┆                            ┆---┃-----  framed-size
+///     ┃   ┆   ┏━━━━━━━━━━━━━━━━━━━━┓   ┆   ┃
+///     ┃   ┆   ┃                    ┃---┆---┃-----  image-size
+///     ┃   ┆   ┃                    ┃   ┆   ┃       border
+///     ┃   ┆   ┃                    ┃   ┆   ┃
+///     ┃   ┆   ┃                    ┃  -┆---┃-----  padding
+///     ┃   ┆   ┃                    ┃   ┆   ┃
+///     ┃   ┆   ┃                    ┃   ┆  -┃-----  margins
+///     ┃   ┆   ┗━━━━━━━━━━━━━━━━━━━━┛   ┆   ┃
+///     ┃   ┆                            ┆---┃-----  cut-frame
+///     ┠─── ┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄┄ ───┨
+///     ┃   │                            │---┃-----  cut-marks
+///     ┗━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━┛
+///
+#[structopt(verbatim_doc_comment)]
 #[allow(dead_code)]
 #[derive(StructOpt, Debug)]
 pub struct PrepareImage {

@@ -1,6 +1,6 @@
 ..\target\release\pprep ^
   --input ../test_data/*.png ^
-  --debug ^
+  --cmd ^
   prep ^
     --output ../test_data/out/*-frame.png ^
     --format 15cm/10cm ^

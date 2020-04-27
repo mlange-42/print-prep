@@ -30,6 +30,16 @@ pub struct Cli {
     #[structopt(short, long)]
     pub input: Vec<String>,
 
+    /// Dummy option to end the `--input` list when no other top-level options are used.
+    ///
+    /// E.g., the following won't work:
+    /// `pprep --input image.jpg prep ...`
+    /// Instead, use this:
+    /// `pprep --input image.jpg --cmd prep ...`
+    #[structopt(verbatim_doc_comment)]
+    #[structopt(short, long)]
+    pub cmd: bool,
+
     /// Number of threads for parallel processing. Optional, default: number of processors.
     #[structopt(short, long)]
     pub threads: Option<usize>,
@@ -51,11 +61,11 @@ pub struct Cli {
 #[allow(dead_code)]
 #[derive(StructOpt, Debug)]
 pub enum Operation {
-    /// Scale images to absolute or relative size.
+    // /// Scale images to absolute or relative size.
     Scale(ScaleImage),
-    /// List files found by input pattern.
+    // /// List files found by input pattern.
     List(ListFiles),
-    /// Prepare images for printing.
+    // /// Prepare images for printing.
     Prep(PrepareImage),
 }
 

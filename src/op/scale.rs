@@ -12,7 +12,7 @@ use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
 
-/// Scale images.
+/// Scale images to absolute or relative size.
 #[derive(StructOpt, Debug)]
 pub struct ScaleImage {
     /// Output path. Use `*` as placeholder for the original base file name.
