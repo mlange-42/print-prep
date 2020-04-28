@@ -7,8 +7,6 @@ Command line tool for preparing photos for printing, and other bulk image operat
 * **[Download binaries](https://github.com/mlange-42/print-prep/releases/)**
 * [Sources on GitHub](https://github.com/mlange-42/print-prep)
 
-_Warning: This project is in a very early stage! However, basic functionality is working._
-
 **Content**
 * [Features](#features)
 * [Installation](#installation)
@@ -20,8 +18,15 @@ _Warning: This project is in a very early stage! However, basic functionality is
 
 ## Features
 
-* Bulk image processing
-* Prepare images for printing, with exact size, 'mat' framing, cut marks, test pattern, EXIF information, ...
+* Bulk image processing from the command line (Linux, Windows, OSX)
+* Bulk-prepare images for printing, with:
+  * Exactly predictable size and resolution,
+  * Cut marks and 'Mat' framing,
+  * EXIF information (date, camera settings, GPS, ...),
+  * Print control element 
+* Convenient syntax with arbitrary mixing of length units (*cm*, *mm*, *in*, *px*)
+* Automatically determines exact sizes for approximate *cm* formats (e.g., 10x15 is actually *10.2 cm x 15.2 cm*)
+* More image processing operations to come...
 
 ## Installation
 
@@ -31,7 +36,7 @@ _Warning: This project is in a very early stage! However, basic functionality is
 ## Getting started
 
 * See section [Examples](#examples) below, and try the batch files in sub-directory [/cmd_examples](https://github.com/mlange-42/print-prep/tree/master/cmd_examples). 
-* Run `pprep -h` to view the full list of options. Use `pprep --help` for a more comprehensive help message.
+* For a full list of options, see section [Commands](#commands) or run `pprep -h`. Run `pprep --help` for a more comprehensive help message.
 * Run `pprep <subcommand> -h` or `pprep <subcommand> --help` for information on a particular command.
 
 ## Examples
@@ -59,7 +64,7 @@ Resulting in something like this:
 
 <!-- ![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)  -->
 ![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80541201-0684c980-89ab-11ea-85f0-59d7c11c0a01.png)  
-_Simple print preparation example_
+_Simple print preparation example._
 
 Further, we can add a print control element and some EXIF information to the image:
 
