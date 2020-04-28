@@ -7,8 +7,6 @@ Command line tool for preparing photos for printing, and other bulk image operat
 * **[Download binaries](https://github.com/mlange-42/print-prep/releases/)**
 * [Sources on GitHub](https://github.com/mlange-42/print-prep)
 
-_Warning: This project is in a very early stage! However, basic functionality is working._
-
 **Content**
 * [Features](#features)
 * [Installation](#installation)
@@ -20,8 +18,15 @@ _Warning: This project is in a very early stage! However, basic functionality is
 
 ## Features
 
-* Bulk image processing
-* Prepare images for printing, with exact size, 'mat' framing, cut marks, test pattern, EXIF information, ...
+* Bulk image processing from the command line (Linux, Windows, OSX)
+* Bulk-prepare images for printing, with:
+  * Exactly predictable size and resolution,
+  * Cut marks and 'mat' framing,
+  * EXIF information (date, camera settings, GPS, ...),
+  * Print control element 
+* Convenient syntax with arbitrary mixing of length units (*cm*, *mm*, *in*, *px*)
+* Automatically determines exact sizes for approximate *cm* formats (e.g., 10x15 is actually *10.2 cm x 15.2 cm*)
+* More image processing operations to come...
 
 ## Installation
 
@@ -31,7 +36,7 @@ _Warning: This project is in a very early stage! However, basic functionality is
 ## Getting started
 
 * See section [Examples](#examples) below, and try the batch files in sub-directory [/cmd_examples](https://github.com/mlange-42/print-prep/tree/master/cmd_examples). 
-* Run `pprep -h` to view the full list of options. Use `pprep --help` for a more comprehensive help message.
+* For a full list of options, see section [Commands](#commands) or run `pprep -h`. Run `pprep --help` for a more comprehensive help message.
 * Run `pprep <subcommand> -h` or `pprep <subcommand> --help` for information on a particular command.
 
 ## Examples
@@ -40,14 +45,14 @@ A simple example for preparing prints with 'mats' (padding) and cut marks:
 
 ```
 pprep ^
-  --input "test_data/*.png" ^
+  --input "test_data/*.jpg" ^
   --cmd ^
   prep ^
     --output "test_data/out/*-marks.png" ^
     --format 10cm/15cm ^
-	--padding 5mm ^
-	--margins 5mm ^
-	--cut-marks ./1mm ^
+    --padding 5mm ^
+    --margins 5mm ^
+    --cut-marks ./1mm ^
     --dpi 90
 ```
 
@@ -55,12 +60,33 @@ pprep ^
 
 > _Note 2:_ On Unix systems, the input pattern(s), as well as the output pattern with placeholder * **MUST be quoted**!.
 
-Resulting in output like this:
+Resulting in something like this:
 
-![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)  
-_Simple print preparation example_
+<!-- ![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)  -->
+![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80541201-0684c980-89ab-11ea-85f0-59d7c11c0a01.png)  
+_Simple print preparation example._
 
+Further, we can add a print control element and some EXIF information to the image:
 
+```
+..\target\release\pprep ^
+  --input "../test_data/*.jpg" ^
+  --cmd ^
+  prep ^
+    --output "../test_data/out/*-exif.png" ^
+    --format 10cm/15cm ^
+    --padding 5mm ^
+    --margins 5mm ^
+    --cut-marks ./1mm ^
+    --exif "{F/2}, {Exp}, ISO {ISO}, {F}" ^
+    --test-pattern 15px/3px ^
+    --dpi 150
+```
+
+Note the two new lines above `--dpi 150`! We get this:
+
+![Print preparation example with EXIF info and control element](https://user-images.githubusercontent.com/44003176/80541712-f4eff180-89ab-11ea-9888-8791f99a9b94.png)  
+_Print preparation example with EXIF info and control element._
 
 ## Commands
 
@@ -106,54 +132,63 @@ SUBCOMMANDS:
 ```
 Prepare images for printing (add cut marks, 'mats', test patterns, EXIF information, ...).
 
-    ┏━━━┯━━━━━━━━━━━━━━━━━━━━━━━━━━━━┯━━━┓
-    ┃   │                            │   ┃-----  format
-    ┠─── ---------------------------- ───┨
-    ┃   |                            |---┃-----  framed-size
-    ┃   |   ┏━━━━━━━━━━━━━━━━━━━━┓   |   ┃
-    ┃   |   ┃                    ┃---|---┃-----  image-size
-    ┃   |   ┃                    ┃   |   ┃       border
-    ┃   |   ┃                    ┃   |   ┃
-    ┃   |   ┃                    ┃  -|---┃-----  padding
-    ┃   |   ┃                    ┃   |   ┃
-    ┃   |   ┃                    ┃   |  -┃-----  margins
-    ┃   |   ┗━━━━━━━━━━━━━━━━━━━━┛   |   ┃
-    ┃   |                            |---┃-----  cut-frame
-    ┠─── ---------------------------- ───┨
-    ┃   │                            │---┃-----  cut-marks
-    ┗━━━┷━━━━━━━━━━━━━━━━━━━━━━━━━━━━┷━━━┛
+<pre>
+     ________________________________________
+    |    |                              |    |
+    |    |                              |    |-----  format
+    |---- ------------------------------ ----|
+    |    |     ____________________     |----|-----  framed-size
+    |    |    |                    |    |    |
+    |    |    |                    |----|----|-----  image-size
+    |    |    |                    |    |    |       border
+    |    |    |                    |    |    |
+    |    |    |                    |   -|----|-----  padding
+    |    |    |                    |    |    |
+    |    |    |                    |    |   -|-----  margins
+    |    |    |____________________|    |    |
+    |    |                              |----|-----  cut-frame
+    |---- ------------------------------ ----|
+    |    |                              |----|-----  cut-marks
+    |____|______________________________|____|
+</pre>
 
 USAGE:
-    pprep prep [FLAGS] [OPTIONS] --format <format> --output <output>
+    pprep prep [FLAGS] [OPTIONS] --format <w/h> --output <output>
 
 FLAGS:
     -h, --help           Prints help information
         --incremental    Enable incremental scaling. For scaling to small sizes, scales down in multiple steps, to 50%
                          per step, averaging over 2x2 pixels
-        --no-rotation    Prevents rotation of portrait format images (or of landscape format images if output is
+        --no-rotation    Prevents rotation of portrait format images (or of landscape format images if `--format` is
                          portrait)
     -V, --version        Prints version information
 
 OPTIONS:
-    -b, --bg <bg>                        Background color. Default `white`
-        --border <border>                Border width. Default none
-        --border-color <border-color>    Border color. Default black
-        --cut-color <cut-color>          Cut marks or frame color. Default: black
-        --cut-frame <cut-frame>          Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`
-        --cut-marks <cut-marks>          Cut marks with offset. Format <line-width>/<offset>. Use alternative to
-                                         `--cut-frame`
-    -d, --dpi <dpi>                      Image resolution. Default `300`
-    -f, --filter <filter>                Filter type for image scaling. One of `(nearest|linear|cubic|gauss|lanczos)`.
-                                         Default: `cubic`
-        --format <format>                Print format `width/height`. Formats in cm are converted to exact print
-                                         formats in inches. Examples: `15cm/10cm`, `6in/4in`, `6000px/4000px`
-        --framed-size <framed-size>      Maximum image size, incl. padding
-        --image-size <image-size>        Maximum image size, excl. padding
-        --margins <margins>              Minimum margins
-    -o, --output <output>                Output path. Use `*` as placeholder for the original base file name.
-                                         Used to determine output image type. On Unix systems, this MUST be quoted!
-        --padding <padding>              Padding
-    -q, --quality <quality>              Image quality for JPEG output in percent. Optional, default `95`
+    -b, --bg <color>                    Background color. Default `white`
+        --border <tp/rt/bm/lt>          Border width around image. Default none. This is included in padding!
+        --border-color <color>          Border color. Default black
+        --color <color>                 Cut marks, frame and exif color. Default: black
+        --cut-frame <w/off>             Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`
+        --cut-marks <w/off>             Cut marks with offset. Format <line-width>/<offset>. Use alternative to `--cut-
+                                        frame`
+    -d, --dpi <dpi>                     Image resolution. Default `300`
+        --exif <format>                 Prints exif data. Formatting string. Example: --exif "{F/2}, {Exp}, ISO {ISO},
+                                        {F}" Common abbreviations: `F/2`, `Exp`, `ISO`, `F`, `Bias`, `Date`, `Mod`.
+                                        Further, all official exif tags
+        --exif-size <size>              Size of exif font, in arbitrary units. Default: `12px`
+    -f, --filter <filter>               Filter type for image scaling. One of `(nearest|linear|cubic|gauss|lanczos)`.
+                                        Default: `cubic`
+        --format <w/h>                  Print format `width/height`. Formats in cm are converted to exact print formats
+                                        in inches. Examples: `15cm/10cm`, `6in/4in`, `6000px/4000px`
+        --framed-size <w/h>             Maximum image size, incl. padding
+        --image-size <w/h>              Maximum image size, excl. padding
+        --margins <tp/rt/bm/lt>         Minimum margins around cut marks
+    -o, --output <output>               Output path. Use `*` as placeholder for the original base file name.
+                                        Used to determine output image type. On Unix systems, this MUST be quoted!
+        --padding <tp/rt/bm/lt>         Padding between image and cut marks
+    -q, --quality <quality>             Image quality for JPEG output in percent. Optional, default `95`
+        --test-pattern <sx/gx/sy/gy>    Prints a print control element, with the given square size and gap. Format:
+                                        `<sx>/<gx>/<sy>/<gy>` or `<size>/<gap>`. Example: `10px/2px/10px/2px`
 ```
 
 ### `scale`
@@ -204,7 +239,7 @@ FLAGS:
 
 To use this crate as a rust library, add the following to your `Cargo.toml` dependencies section:
 ```
-ppa = { git = "https://github.com/mlange-42/print-prep.git" }
+print-prep = { git = "https://github.com/mlange-42/print-prep.git" }
 ```
 
 _Warning:_ The API is still incomplete and highly unstable, so be prepared for frequent changes. 

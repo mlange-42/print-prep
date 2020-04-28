@@ -1,5 +1,5 @@
 ..\target\release\pprep ^
-  --input "../test_data/*.png" ^
+  --input "../test_data/*.png" "../test_data/*.jpg" ^
   --cmd ^
   prep ^
     --output "../test_data/out/*-frame.png" ^
