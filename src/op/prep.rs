@@ -59,15 +59,15 @@ pub struct PrepareImage {
     pub dpi: Option<f64>,
 
     /// Cut marks with offset. Format <line-width>/<offset>. Use alternative to `--cut-frame`.
-    #[structopt(name = "cut-marks", long)]
+    #[structopt(name = "cut-marks", long, value_name = "w/off")]
     pub cut_marks: Option<FreeSize>,
 
     /// Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`.
-    #[structopt(name = "cut-frame", long)]
+    #[structopt(name = "cut-frame", long, value_name = "w/off")]
     pub cut_frame: Option<FreeSize>,
 
     /// Cut marks, frame and exif color. Default: black.
-    #[structopt(long)]
+    #[structopt(long, value_name = "color")]
     pub color: Option<Color>,
 
     /// Filter type for image scaling.
@@ -81,32 +81,32 @@ pub struct PrepareImage {
     /// Examples: `15cm/10cm`, `6in/4in`, `6000px/4000px`.
     ///
     /// To use an exact size given in cm, use floating point numbers, e.g. `15.0cm/10.0cm`.
-    #[structopt(long)]
+    #[structopt(long, value_name = "w/h")]
     pub format: FixSize,
 
     /// Maximum image size, excl. padding.
-    #[structopt(name = "image-size", long)]
+    #[structopt(name = "image-size", long, value_name = "w/h")]
     pub image_size: Option<FixSize>,
 
     /// Maximum image size, incl. padding.
-    #[structopt(name = "framed-size", long)]
+    #[structopt(name = "framed-size", long, value_name = "w/h")]
     pub framed_size: Option<FixSize>,
 
     /// Padding between image and cut marks.
-    #[structopt(long)]
+    #[structopt(long, value_name = "tp/rt/bm/lt")]
     pub padding: Option<Borders>,
 
     /// Minimum margins around cut marks.
-    #[structopt(long)]
+    #[structopt(long, value_name = "tp/rt/bm/lt")]
     pub margins: Option<Borders>,
 
     /// Border width around image. Default none.
     /// This is included in padding!
-    #[structopt(long)]
+    #[structopt(long, value_name = "tp/rt/bm/lt")]
     pub border: Option<Borders>,
 
     /// Border color. Default black.
-    #[structopt(name = "border-color", long)]
+    #[structopt(name = "border-color", long, value_name = "color")]
     pub border_color: Option<Color>,
 
     /// Enable incremental scaling.
@@ -115,7 +115,7 @@ pub struct PrepareImage {
     pub incremental: bool,
 
     /// Background color. Default `white`.
-    #[structopt(short, long)]
+    #[structopt(short, long, value_name = "color")]
     pub bg: Option<Color>,
 
     /// Prevents rotation of portrait format images
@@ -131,7 +131,7 @@ pub struct PrepareImage {
     #[structopt(long, value_name = "format")]
     pub exif: Option<String>,
 
-    /// Size of exif font, in arbitrary unity. Default: `12px`.
+    /// Size of exif font, in arbitrary units. Default: `12px`.
     #[structopt(name = "exif-size", long, value_name = "size")]
     pub exif_size: Option<Length>,
 

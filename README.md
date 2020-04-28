@@ -106,6 +106,7 @@ SUBCOMMANDS:
 ```
 Prepare images for printing (add cut marks, 'mats', test patterns, EXIF information, ...).
 
+<pre>
      ________________________________________
     |    |                              |    |
     |    |                              |    |-----  format
@@ -123,38 +124,45 @@ Prepare images for printing (add cut marks, 'mats', test patterns, EXIF informat
     |---- ------------------------------ ----|
     |    |                              |----|-----  cut-marks
     |____|______________________________|____|
-	
+</pre>
+
 USAGE:
-    pprep prep [FLAGS] [OPTIONS] --format <format> --output <output>
+    pprep prep [FLAGS] [OPTIONS] --format <w/h> --output <output>
 
 FLAGS:
     -h, --help           Prints help information
         --incremental    Enable incremental scaling. For scaling to small sizes, scales down in multiple steps, to 50%
                          per step, averaging over 2x2 pixels
-        --no-rotation    Prevents rotation of portrait format images (or of landscape format images if output is
+        --no-rotation    Prevents rotation of portrait format images (or of landscape format images if `--format` is
                          portrait)
     -V, --version        Prints version information
 
 OPTIONS:
-    -b, --bg <bg>                        Background color. Default `white`
-        --border <border>                Border width. Default none
-        --border-color <border-color>    Border color. Default black
-        --cut-color <cut-color>          Cut marks or frame color. Default: black
-        --cut-frame <cut-frame>          Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`
-        --cut-marks <cut-marks>          Cut marks with offset. Format <line-width>/<offset>. Use alternative to
-                                         `--cut-frame`
-    -d, --dpi <dpi>                      Image resolution. Default `300`
-    -f, --filter <filter>                Filter type for image scaling. One of `(nearest|linear|cubic|gauss|lanczos)`.
-                                         Default: `cubic`
-        --format <format>                Print format `width/height`. Formats in cm are converted to exact print
-                                         formats in inches. Examples: `15cm/10cm`, `6in/4in`, `6000px/4000px`
-        --framed-size <framed-size>      Maximum image size, incl. padding
-        --image-size <image-size>        Maximum image size, excl. padding
-        --margins <margins>              Minimum margins
-    -o, --output <output>                Output path. Use `*` as placeholder for the original base file name.
-                                         Used to determine output image type. On Unix systems, this MUST be quoted!
-        --padding <padding>              Padding
-    -q, --quality <quality>              Image quality for JPEG output in percent. Optional, default `95`
+    -b, --bg <color>                    Background color. Default `white`
+        --border <tp/rt/bm/lt>          Border width around image. Default none. This is included in padding!
+        --border-color <color>          Border color. Default black
+        --color <color>                 Cut marks, frame and exif color. Default: black
+        --cut-frame <w/off>             Cut frame. Format <line-width>/<extend>. Use alternative to `--cut-marks`
+        --cut-marks <w/off>             Cut marks with offset. Format <line-width>/<offset>. Use alternative to `--cut-
+                                        frame`
+    -d, --dpi <dpi>                     Image resolution. Default `300`
+        --exif <format>                 Prints exif data. Formatting string. Example: --exif "{F/2}, {Exp}, ISO {ISO},
+                                        {F}" Common abbreviations: `F/2`, `Exp`, `ISO`, `F`, `Bias`, `Date`, `Mod`.
+                                        Further, all official exif tags
+        --exif-size <size>              Size of exif font, in arbitrary units. Default: `12px`
+    -f, --filter <filter>               Filter type for image scaling. One of `(nearest|linear|cubic|gauss|lanczos)`.
+                                        Default: `cubic`
+        --format <w/h>                  Print format `width/height`. Formats in cm are converted to exact print formats
+                                        in inches. Examples: `15cm/10cm`, `6in/4in`, `6000px/4000px`
+        --framed-size <w/h>             Maximum image size, incl. padding
+        --image-size <w/h>              Maximum image size, excl. padding
+        --margins <tp/rt/bm/lt>         Minimum margins around cut marks
+    -o, --output <output>               Output path. Use `*` as placeholder for the original base file name.
+                                        Used to determine output image type. On Unix systems, this MUST be quoted!
+        --padding <tp/rt/bm/lt>         Padding between image and cut marks
+    -q, --quality <quality>             Image quality for JPEG output in percent. Optional, default `95`
+        --test-pattern <sx/gx/sy/gy>    Prints a print control element, with the given square size and gap. Format:
+                                        `<sx>/<gx>/<sy>/<gy>` or `<size>/<gap>`. Example: `10px/2px/10px/2px`
 ```
 
 ### `scale`
