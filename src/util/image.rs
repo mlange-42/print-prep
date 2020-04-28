@@ -1,12 +1,15 @@
 //! Image utilities
 
 use crate::units::color::Color;
+use crate::units::exif::FIELDS;
 use crate::units::ScaleMode;
 use crate::util::PathUtil;
+use exif::Exif;
 use image::flat::SampleLayout;
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 use path_absolutize::Absolutize;
+use std::collections::HashMap;
 use std::error::Error;
 use std::fmt;
 use std::fs::File;
@@ -16,6 +19,27 @@ use std::path::PathBuf;
 pub struct ImageUtil {}
 
 impl ImageUtil {
+    pub fn get_exif(path: &PathBuf) -> Result<Exif, Box<dyn Error>> {
+        let file = std::fs::File::open(path)?;
+        let mut bufreader = std::io::BufReader::new(&file);
+        let exifreader = exif::Reader::new();
+        let exif = exifreader.read_from_container(&mut bufreader)?;
+        Ok(exif)
+    }
+    pub fn get_exif_map(path: &PathBuf) -> Result<HashMap<String, String>, Box<dyn Error>> {
+        let exif = Self::get_exif(path)?;
+        let mut map = HashMap::new();
+        for f in exif.fields() {
+            let key = f.tag.to_string();
+            let value = f.display_value().with_unit(&exif).to_string();
+            map.insert(key.clone(), value.clone());
+            if FIELDS.contains_key(&*key) {
+                map.insert(FIELDS[&*key].to_string(), value);
+            }
+        }
+        Ok(map)
+    }
+
     pub fn fill_image(image: &mut DynamicImage, color: &[u8; 4]) {
         let col = Rgba(*color);
         for y in 0..image.height() {

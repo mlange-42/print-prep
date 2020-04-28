@@ -23,7 +23,11 @@ pub trait ImageOperation {
 pub trait ImageIoOperation: ImageOperation + Send + Sync {
     fn output(&self) -> &str;
     fn quality(&self) -> &Option<u8>;
-    fn process_image(&self, image: &DynamicImage) -> Result<DynamicImage, Box<dyn Error>>;
+    fn process_image(
+        &self,
+        image: &DynamicImage,
+        file: &PathBuf,
+    ) -> Result<DynamicImage, Box<dyn Error>>;
     fn execute(&self, files: &[PathBuf]) -> Result<(), Box<dyn Error>> {
         let bar = ProgressBar::new(files.len() as u64);
         files
@@ -51,7 +55,7 @@ pub trait ImageIoOperation: ImageOperation + Send + Sync {
                     }
                 };
 
-                let output = match self.process_image(&input) {
+                let output = match self.process_image(&input, &file) {
                     Ok(o) => o,
                     Err(e) => {
                         return Err(ImageFormatError(format!(

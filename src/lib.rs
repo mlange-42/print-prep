@@ -10,9 +10,28 @@ pub mod util;
 #[macro_use]
 extern crate lazy_static;
 
+use rust_embed::RustEmbed;
+use rusttype::Font;
 use std::error::Error;
 use std::fmt;
 use std::process::exit;
+
+#[derive(RustEmbed)]
+#[folder = "assets/"]
+struct Assets;
+
+#[derive(Debug)]
+pub struct Fonts {
+    default: Font<'static>,
+}
+impl Default for Fonts {
+    fn default() -> Self {
+        Fonts {
+            default: Font::from_bytes(Assets::get("fonts/Consolas.ttf").unwrap().into_owned())
+                .expect("Error constructing Font"),
+        }
+    }
+}
 
 /// Trait to print a message and exit the program.
 /// Implemented for `Result` and `Option`.

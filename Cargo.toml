@@ -25,4 +25,7 @@ path-absolutize = "1.0.2"
 structopt = {version = "0.3", features = ["wrap_help"]}
 indicatif = "0.14.0"
 rayon = "1.3.0"
+kamadak-exif = "0.5"
 lazy_static = "1.4.0"
+rusttype = "0.8.2"
+rust-embed = "5.5.1"
