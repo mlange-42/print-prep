@@ -2,6 +2,7 @@
 
 mod border;
 pub mod color;
+mod exif;
 pub mod format;
 mod length;
 mod scale;

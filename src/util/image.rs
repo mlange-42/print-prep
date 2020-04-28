@@ -3,6 +3,7 @@
 use crate::units::color::Color;
 use crate::units::ScaleMode;
 use crate::util::PathUtil;
+use exif::Exif;
 use image::flat::SampleLayout;
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
@@ -16,6 +17,14 @@ use std::path::PathBuf;
 pub struct ImageUtil {}
 
 impl ImageUtil {
+    pub fn get_exif(path: &PathBuf) -> Result<Exif, Box<dyn Error>> {
+        let file = std::fs::File::open(path)?;
+        let mut bufreader = std::io::BufReader::new(&file);
+        let exifreader = exif::Reader::new();
+        let exif = exifreader.read_from_container(&mut bufreader)?;
+        Ok(exif)
+    }
+
     pub fn fill_image(image: &mut DynamicImage, color: &[u8; 4]) {
         let col = Rgba(*color);
         for y in 0..image.height() {

@@ -1,5 +1,5 @@
 ..\target\release\pprep ^
-  --input "../test_data/*.png" ^
+  --input "../test_data/*.png" "../test_data/*.jpg" ^
   --cmd ^
   scale ^
     --output "../test_data/out/*-scale-percent.png" ^

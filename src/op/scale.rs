@@ -90,7 +90,11 @@ impl ImageIoOperation for ScaleImage {
         &self.quality
     }
 
-    fn process_image(&self, image: &DynamicImage) -> Result<DynamicImage, Box<dyn Error>> {
+    fn process_image(
+        &self,
+        image: &DynamicImage,
+        _file: &PathBuf,
+    ) -> Result<DynamicImage, Box<dyn Error>> {
         self.check()?;
 
         let dpi = self.dpi.unwrap_or(300.0);
