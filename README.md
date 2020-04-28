@@ -40,7 +40,7 @@ A simple example for preparing prints with 'mats' (padding) and cut marks:
 
 ```
 pprep ^
-  --input "test_data/*.png" ^
+  --input "test_data/*.jpg" ^
   --cmd ^
   prep ^
     --output "test_data/out/*-marks.png" ^
@@ -55,12 +55,33 @@ pprep ^
 
 > _Note 2:_ On Unix systems, the input pattern(s), as well as the output pattern with placeholder * **MUST be quoted**!.
 
-Resulting in output like this:
+Resulting in something like this:
 
-![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)  
+<!-- ![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80386704-0bad2000-88a8-11ea-85ed-81c40b471d6e.png)  -->
+![Simple print preparation example](https://user-images.githubusercontent.com/44003176/80541201-0684c980-89ab-11ea-85f0-59d7c11c0a01.png)  
 _Simple print preparation example_
 
+Further, we can add a print control element and some EXIF information to the image:
 
+```
+..\target\release\pprep ^
+  --input "../test_data/*.jpg" ^
+  --cmd ^
+  prep ^
+    --output "../test_data/out/*-exif.png" ^
+    --format 10cm/15cm ^
+    --padding 5mm ^
+    --margins 5mm ^
+    --cut-marks ./1mm ^
+    --exif "{F/2}, {Exp}, ISO {ISO}, {F}" ^
+    --test-pattern 15px/3px ^
+    --dpi 150
+```
+
+Note the two new lines above `--dpi 150`! We get this:
+
+![Print preparation example with EXIF info and control element](https://user-images.githubusercontent.com/44003176/80541712-f4eff180-89ab-11ea-9888-8791f99a9b94.png)  
+_Print preparation example with EXIF info and control element._
 
 ## Commands
 

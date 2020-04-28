@@ -1,5 +1,5 @@
 ..\target\release\pprep ^
-  --input "../test_data/*.png" ^
+  --input "../test_data/*.jpg" ^
   --cmd ^
   prep ^
     --output "../test_data/out/*-simple.png" ^
@@ -7,5 +7,5 @@
 	--padding 5mm ^
 	--margins 5mm ^
 	--cut-marks ./1mm ^
-	--dpi 90
+	--dpi 150
 pause
