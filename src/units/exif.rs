@@ -1,9 +1,20 @@
 use std::collections::HashMap;
 lazy_static! {
-    pub static ref FIELDS: HashMap<&'static str, &'static str> = create_exif_fields();
+    pub static ref ABBREVS: HashMap<&'static str, &'static str> = create_exif_abbreviations();
+    pub static ref FIELDS: HashMap<&'static str, &'static str> =
+        swap_map(create_exif_abbreviations());
 }
 
-fn create_exif_fields() -> HashMap<&'static str, &'static str> {
+fn swap_map(map: HashMap<&'static str, &'static str>) -> HashMap<&'static str, &'static str> {
+    let mut m = HashMap::new();
+
+    for (k, v) in map.iter() {
+        m.insert(*v, *k);
+    }
+
+    m
+}
+fn create_exif_abbreviations() -> HashMap<&'static str, &'static str> {
     let mut m = HashMap::new();
 
     m.insert("Mod", "Model");

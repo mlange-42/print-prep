@@ -3,12 +3,13 @@
 use crate::cli::parse;
 use crate::op::{ImageIoOperation, ImageOperation};
 use crate::units::color::Color;
-use crate::units::{format, FreeSize, LengthUnit, ScaleMode};
+use crate::units::{format, FreeSize, Length, LengthUnit, ScaleMode};
 use crate::units::{Borders, FixSize};
 use crate::util::ImageUtil;
 use image::imageops::FilterType;
 use image::{DynamicImage, GenericImage, GenericImageView, Rgba};
 use imageproc::rect::Rect;
+use std::collections::HashMap;
 use std::error::Error;
 use std::path::PathBuf;
 use structopt::StructOpt;
@@ -65,9 +66,9 @@ pub struct PrepareImage {
     #[structopt(name = "cut-frame", long)]
     pub cut_frame: Option<FreeSize>,
 
-    /// Cut marks or frame color. Default: black.
-    #[structopt(name = "cut-color", long)]
-    pub cut_color: Option<Color>,
+    /// Cut marks, frame and exif color. Default: black.
+    #[structopt(long)]
+    pub color: Option<Color>,
 
     /// Filter type for image scaling.
     /// One of `(nearest|linear|cubic|gauss|lanczos)`.
@@ -91,15 +92,16 @@ pub struct PrepareImage {
     #[structopt(name = "framed-size", long)]
     pub framed_size: Option<FixSize>,
 
-    /// Padding.
+    /// Padding between image and cut marks.
     #[structopt(long)]
     pub padding: Option<Borders>,
 
-    /// Minimum margins.
+    /// Minimum margins around cut marks.
     #[structopt(long)]
     pub margins: Option<Borders>,
 
-    /// Border width. Default none.
+    /// Border width around image. Default none.
+    /// This is included in padding!
     #[structopt(long)]
     pub border: Option<Borders>,
 
@@ -116,15 +118,31 @@ pub struct PrepareImage {
     #[structopt(short, long)]
     pub bg: Option<Color>,
 
-    /// Prevents rotation of portrait format images (or of landscape format images if output is portrait).
+    /// Prevents rotation of portrait format images
+    /// (or of landscape format images if `--format` is portrait).
     #[structopt(name = "no-rotation", long)]
     pub no_rotation: bool,
 
-    /// Prints exif data. Space-separated list of exif tags.
+    /// Prints exif data. Formatting string.
+    /// Example: --exif "{F/2}, {Exp}, ISO {ISO}, {F}"
     /// Common abbreviations:
-    /// `F/2`, `Exp`, `ISO`, `F`, `Bias`, `Date`, `Mod`
-    #[structopt(long, value_name = "tag")]
-    pub exif: Vec<String>,
+    /// `F/2`, `Exp`, `ISO`, `F`, `Bias`, `Date`, `Mod`.
+    /// Further, all official exif tags.
+    #[structopt(long, value_name = "format")]
+    pub exif: Option<String>,
+
+    /// Size of exif font, in arbitrary unity. Default: `12px`.
+    #[structopt(name = "exif-size", long, value_name = "size")]
+    pub exif_size: Option<Length>,
+
+    /// Prints a print control element, with the given square size and gap.
+    /// Format: `<sx>/<gx>/<sy>/<gy>` or `<size>/<gap>`.
+    /// Example: `10px/2px/10px/2px`
+    #[structopt(name = "test-pattern", long, value_name = "sx/gx/sy/gy")]
+    pub test_pattern: Option<Borders>,
+
+    #[structopt(skip)]
+    fonts: crate::Fonts,
 }
 
 impl ImageOperation for PrepareImage {
@@ -198,14 +216,16 @@ impl ImageIoOperation for PrepareImage {
             rotate,
         );
 
+        let color = self
+            .color
+            .as_ref()
+            .unwrap_or(&Color::new(0, 0, 0, 255))
+            .clone();
+        let rgba = Rgba(*color.channels());
+
         // Cut marks
         if let Some(m) = &self.cut_marks {
             let marks = m.to_px(dpi);
-            let color = Rgba(
-                self.cut_color
-                    .as_ref()
-                    .map_or([0_u8, 0, 0, 255], |c| *c.channels()),
-            );
             let lw = marks.width().as_ref().map_or(1, |l| l.value() as i32);
             let lw2 = lw / 2;
             let offset = marks.height().as_ref().map_or(0, |l| l.value() as i32);
@@ -218,12 +238,12 @@ impl ImageIoOperation for PrepareImage {
             imageproc::drawing::draw_filled_rect_mut(
                 &mut result,
                 Rect::at(0, ymin - lw2).of_size((xmin - offset) as u32, lw as u32),
-                color,
+                rgba,
             );
             imageproc::drawing::draw_filled_rect_mut(
                 &mut result,
                 Rect::at(xmin - lw2, 0).of_size(lw as u32, (ymin - offset) as u32),
-                color,
+                rgba,
             );
 
             // Top right
@@ -231,25 +251,25 @@ impl ImageIoOperation for PrepareImage {
                 &mut result,
                 Rect::at(xmax + offset, ymin - lw2)
                     .of_size((width as i32 - xmax - offset) as u32, lw as u32),
-                color,
+                rgba,
             );
             imageproc::drawing::draw_filled_rect_mut(
                 &mut result,
                 Rect::at(xmax - lw2, 0).of_size(lw as u32, (ymin - offset) as u32),
-                color,
+                rgba,
             );
 
             // Bottom left
             imageproc::drawing::draw_filled_rect_mut(
                 &mut result,
                 Rect::at(0, ymax - lw2).of_size((xmin - offset) as u32, lw as u32),
-                color,
+                rgba,
             );
             imageproc::drawing::draw_filled_rect_mut(
                 &mut result,
                 Rect::at(xmin - lw2, ymax + offset)
                     .of_size(lw as u32, (height as i32 - ymax - offset) as u32),
-                color,
+                rgba,
             );
 
             // Bottom right
@@ -257,24 +277,19 @@ impl ImageIoOperation for PrepareImage {
                 &mut result,
                 Rect::at(xmax + offset, ymax - lw2)
                     .of_size((width as i32 - xmax - offset) as u32, lw as u32),
-                color,
+                rgba,
             );
             imageproc::drawing::draw_filled_rect_mut(
                 &mut result,
                 Rect::at(xmax - lw2, ymax + offset)
                     .of_size(lw as u32, (height as i32 - ymax - offset) as u32),
-                color,
+                rgba,
             );
         }
 
         // Cut frame
         if let Some(f) = &self.cut_frame {
             let frame = f.to_px(dpi);
-            let color = Rgba(
-                self.cut_color
-                    .as_ref()
-                    .map_or([0_u8, 0, 0, 255], |c| *c.channels()),
-            );
             let lw = frame.width().as_ref().map_or(1, |l| l.value() as i32);
             let lw2 = lw / 2;
             let offset = frame.height().as_ref().map_or(0, |l| l.value() as i32);
@@ -288,7 +303,7 @@ impl ImageIoOperation for PrepareImage {
                 &mut result,
                 Rect::at(xmin - offset, ymin - lw2)
                     .of_size(((xmax - xmin) + 2 * offset) as u32, lw as u32),
-                color,
+                rgba,
             );
 
             // Bottom
@@ -296,7 +311,7 @@ impl ImageIoOperation for PrepareImage {
                 &mut result,
                 Rect::at(xmin - offset, ymax - lw2)
                     .of_size(((xmax - xmin) + 2 * offset) as u32, lw as u32),
-                color,
+                rgba,
             );
 
             // Left
@@ -304,7 +319,7 @@ impl ImageIoOperation for PrepareImage {
                 &mut result,
                 Rect::at(xmin - lw2, ymin - offset)
                     .of_size(lw as u32, ((ymax - ymin) + 2 * offset) as u32),
-                color,
+                rgba,
             );
 
             // Right
@@ -312,21 +327,46 @@ impl ImageIoOperation for PrepareImage {
                 &mut result,
                 Rect::at(xmax - lw2, ymin - offset)
                     .of_size(lw as u32, ((ymax - ymin) + 2 * offset) as u32),
-                color,
+                rgba,
             );
         }
 
+        let pad_distance = Length::mm(2.0).to_px(dpi).value() as u32;
         // EXIF data
-        let exif = ImageUtil::get_exif(&file);
-        if let Ok(exif) = &exif {
-            let fields: Vec<_> = exif.fields().collect();
-            /*for f in fields {
-                println!("{} {}", f.tag, f.display_value().with_unit(exif));
-            }*/
+        if let Some(format) = &self.exif {
+            let exif = ImageUtil::get_exif_map(&file);
+            let font_size = self
+                .exif_size
+                .clone()
+                .unwrap_or_else(|| Length::px(12))
+                .to_px(dpi)
+                .value();
+            if let Ok(exif) = exif {
+                let str = self.exif_string(&format, &exif);
+                imageproc::drawing::draw_text_mut(
+                    &mut result,
+                    rgba,
+                    x_img, //x_img - padding.left().value() as u32 + 5,
+                    y_img + img_height + padding.bottom().value() as u32 + pad_distance,
+                    rusttype::Scale::uniform(font_size as f32),
+                    &self.fonts.default,
+                    &str,
+                )
+            }
         }
 
         // Control element
-        // TODO
+        if let Some(patt) = &self.test_pattern {
+            let borders = patt.to_px(dpi);
+            let mut element = self.create_control_element(&borders);
+            //let x = x_img + img_width + padding.right().value() as u32 - 5 - element.width();
+            let x = x_img + img_width - element.width();
+            let y = y_img + img_height + padding.bottom().value() as u32 + pad_distance;
+            if result.height() < y + element.height() {
+                element = element.crop_imm(0, 0, element.width(), result.height() - y);
+            }
+            result.copy_from(&element, x, y)?;
+        }
 
         // ***************************************
         // ********* SCALE & COPY ORIGINAL *******
@@ -380,6 +420,169 @@ impl PrepareImage {
         }
 
         Ok(())
+    }
+
+    fn exif_string(&self, format: &str, exif: &HashMap<String, String>) -> String {
+        let mut str = format.to_string();
+        for (k, v) in exif.iter() {
+            let key = format!("{{{}}}", k);
+            str = str.replace(&key, v);
+        }
+        str
+    }
+
+    fn create_control_element(&self, sizes: &Borders) -> DynamicImage {
+        let off_x = sizes.right().value() as i32;
+        let off_y = sizes.left().value() as i32;
+        let sx = sizes.top().value() as u32;
+        let sy = sizes.bottom().value() as u32;
+        let mut image =
+            DynamicImage::new_rgb8(9 * sy + 10 * off_x as u32, 3 * sy + 4 * off_y as u32);
+        ImageUtil::fill_image(&mut image, &[255, 255, 255, 255]);
+
+        // CMY(K)
+        for i in 0..5 {
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut image,
+                Rect::at(off_x + i * (sx as i32 + off_x), off_y).of_size(sx, sy),
+                Rgba([i as u8 * 51, 255, 255, 255]),
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut image,
+                Rect::at(
+                    off_x + i * (sx as i32 + off_x),
+                    off_y + 1 * (sy as i32 + off_y),
+                )
+                .of_size(sx, sy),
+                Rgba([255, i as u8 * 51, 255, 255]),
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut image,
+                Rect::at(
+                    off_x + i * (sx as i32 + off_x),
+                    off_y + 2 * (sy as i32 + off_y),
+                )
+                .of_size(sx, sy),
+                Rgba([255, 255, i as u8 * 51, 255]),
+            );
+        }
+        // RGB
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(off_x + 5 * (sx as i32 + off_x), off_y).of_size(sx, sy),
+            Rgba([255, 0, 0, 255]),
+        );
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(
+                off_x + 5 * (sx as i32 + off_x),
+                off_y + 1 * (sy as i32 + off_y),
+            )
+            .of_size(sx, sy),
+            Rgba([0, 255, 0, 255]),
+        );
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(
+                off_x + 5 * (sx as i32 + off_x),
+                off_y + 2 * (sy as i32 + off_y),
+            )
+            .of_size(sx, sy),
+            Rgba([0, 0, 255, 255]),
+        );
+        // Greyscale light
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(off_x + 6 * (sx as i32 + off_x), off_y).of_size(sx, sy),
+            Rgba([255, 255, 255, 255]),
+        );
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(
+                off_x + 6 * (sx as i32 + off_x),
+                off_y + 1 * (sy as i32 + off_y),
+            )
+            .of_size(sx, sy),
+            Rgba([204, 204, 204, 255]),
+        );
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(
+                off_x + 6 * (sx as i32 + off_x),
+                off_y + 2 * (sy as i32 + off_y),
+            )
+            .of_size(sx, sy),
+            Rgba([153, 153, 153, 255]),
+        );
+        // Greyscale dark
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(off_x + 7 * (sx as i32 + off_x), off_y).of_size(sx, sy),
+            Rgba([102, 102, 102, 255]),
+        );
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(
+                off_x + 7 * (sx as i32 + off_x),
+                off_y + 1 * (sy as i32 + off_y),
+            )
+            .of_size(sx, sy),
+            Rgba([51, 51, 51, 255]),
+        );
+        imageproc::drawing::draw_filled_rect_mut(
+            &mut image,
+            Rect::at(
+                off_x + 7 * (sx as i32 + off_x),
+                off_y + 2 * (sy as i32 + off_y),
+            )
+            .of_size(sx, sy),
+            Rgba([0, 0, 0, 255]),
+        );
+        // Vertical pattern
+        for i in 0..(sx / 2) {
+            let x = 2 * i as i32;
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut image,
+                Rect::at(off_x + 8 * (sx as i32 + off_x) + x, off_y).of_size(1, sy),
+                Rgba([0, 0, 0, 255]),
+            );
+        }
+        // Horizontal pattern
+        for i in 0..(sy / 2) {
+            let y = 2 * i as i32;
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut image,
+                Rect::at(
+                    off_x + 8 * (sx as i32 + off_x),
+                    off_y + 2 * (sy as i32 + off_y) + y,
+                )
+                .of_size(sx, 1),
+                Rgba([0, 0, 0, 255]),
+            );
+        }
+        // Crosshair
+        {
+            let x = off_x + 8 * (sx as i32 + off_x) + sx as i32 / 2;
+            let y = off_y + 1 * (sy as i32 + off_y) + sy as i32 / 2;
+            imageproc::drawing::draw_hollow_circle_mut(
+                &mut image,
+                (x, y),
+                std::cmp::min(sx, sy) as i32 / 3,
+                Rgba([0, 0, 0, 255]),
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut image,
+                Rect::at(x - sx as i32 / 2, y).of_size(sx, 1),
+                Rgba([0, 0, 0, 255]),
+            );
+            imageproc::drawing::draw_filled_rect_mut(
+                &mut image,
+                Rect::at(x, y - sy as i32 / 2).of_size(1, sy),
+                Rgba([0, 0, 0, 255]),
+            );
+        }
+
+        image
     }
 
     /// Returns calculated (image, framed, padding, margins).
