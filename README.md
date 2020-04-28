@@ -21,7 +21,7 @@ Command line tool for preparing photos for printing, and other bulk image operat
 * Bulk image processing from the command line (Linux, Windows, OSX)
 * Bulk-prepare images for printing, with:
   * Exactly predictable size and resolution,
-  * Cut marks and 'Mat' framing,
+  * Cut marks and 'mat' framing,
   * EXIF information (date, camera settings, GPS, ...),
   * Print control element 
 * Convenient syntax with arbitrary mixing of length units (*cm*, *mm*, *in*, *px*)
